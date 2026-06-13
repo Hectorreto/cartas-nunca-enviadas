@@ -14,6 +14,7 @@ export default function AdminCharacterEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
   const traitInputRef = useRef<HTMLInputElement>(null)
 
   const { data: character } = useQuery({
@@ -146,7 +147,7 @@ export default function AdminCharacterEditPage() {
         </div>
 
         {/* Retrato */}
-        <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? `new-${Date.now()}`}/portrait.jpg`}
+        <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? newId}/portrait.jpg`}
           label="Retrato del personaje" onChange={setPortraitUrl} />
 
         <div className="flex gap-3 pt-2">

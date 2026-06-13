@@ -22,6 +22,7 @@ export default function AdminChapterEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
 
   const { data: chapter } = useQuery({
     queryKey: ['chapter', id],
@@ -189,7 +190,7 @@ export default function AdminChapterEditPage() {
         {/* Portada */}
         <ImageUpload
           value={coverUrl}
-          storagePath={`covers/${id ?? `new-${Date.now()}`}/cover.jpg`}
+          storagePath={`covers/${id ?? newId}/cover.jpg`}
           label="Portada del capítulo"
           onChange={setCoverUrl}
         />

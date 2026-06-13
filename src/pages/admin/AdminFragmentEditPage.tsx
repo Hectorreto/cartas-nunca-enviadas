@@ -18,6 +18,7 @@ export default function AdminFragmentEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
 
   const { data: fragment } = useQuery({
     queryKey: ['fragment', id],
@@ -113,7 +114,7 @@ export default function AdminFragmentEditPage() {
         </div>
 
         {/* Imagen */}
-        <ImageUpload value={imageUrl} storagePath={`fragments/${id ?? `new-${Date.now()}`}/image.jpg`}
+        <ImageUpload value={imageUrl} storagePath={`fragments/${id ?? newId}/image.jpg`}
           label="Imagen del fragmento" onChange={setImageUrl} />
 
         <div className="flex gap-3 pt-2">

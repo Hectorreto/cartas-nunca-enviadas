@@ -17,6 +17,7 @@ export default function AdminExtraEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
 
   const { data: extra } = useQuery({
     queryKey: ['extra', id],
@@ -112,7 +113,7 @@ export default function AdminExtraEditPage() {
         )}
 
         {/* Imagen */}
-        <ImageUpload value={imageUrl} storagePath={`extras/${id ?? `new-${Date.now()}`}/image.jpg`}
+        <ImageUpload value={imageUrl} storagePath={`extras/${id ?? newId}/image.jpg`}
           label="Imagen" onChange={setImageUrl} />
 
         <div className="flex gap-3 pt-2">

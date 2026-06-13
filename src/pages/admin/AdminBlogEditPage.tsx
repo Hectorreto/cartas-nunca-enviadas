@@ -24,6 +24,7 @@ export default function AdminBlogEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
 
   const { data: post } = useQuery({
     queryKey: ['blog_post_id', id],
@@ -142,7 +143,7 @@ export default function AdminBlogEditPage() {
         </div>
 
         {/* Portada */}
-        <ImageUpload value={coverUrl} storagePath={`blog/${id ?? `new-${Date.now()}`}/cover.jpg`}
+        <ImageUpload value={coverUrl} storagePath={`blog/${id ?? newId}/cover.jpg`}
           label="Imagen de portada" onChange={setCoverUrl} />
 
         {/* Contenido */}
