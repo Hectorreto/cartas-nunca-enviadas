@@ -24,15 +24,15 @@ export default function CommentSection({ chapterId }: Props) {
 
   const postMutation = useMutation({
     mutationFn: (content: string) => postComment(chapterId, user!.id, content),
-    onSuccess: () => {
+    onSuccess: async () => {
       setText('')
-      queryClient.invalidateQueries({ queryKey: ['comments', chapterId] })
+      await queryClient.invalidateQueries({ queryKey: ['comments', chapterId] })
     },
   })
 
   const deleteMutation = useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comments', chapterId] }),
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['comments', chapterId] }) },
   })
 
   function handleSubmit(e: React.FormEvent) {

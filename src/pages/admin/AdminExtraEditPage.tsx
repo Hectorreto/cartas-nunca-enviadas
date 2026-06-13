@@ -51,8 +51,9 @@ export default function AdminExtraEditPage() {
       if (isNew) await createExtra(data)
       else await updateExtra(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['extras'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['extras'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['extra', id] })
       toast.success(isNew ? 'Extra creado' : 'Extra actualizado')
       navigate('/admin/extras')
     },

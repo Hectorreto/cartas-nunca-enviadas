@@ -12,7 +12,7 @@ function ExtraList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteExtra,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado') },
     onError: () => toast.error('Error al eliminar el extra'),
   })
 

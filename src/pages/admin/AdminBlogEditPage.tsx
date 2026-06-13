@@ -74,8 +74,9 @@ export default function AdminBlogEditPage() {
       if (isNew) await createBlogPost(data)
       else await updateBlogPost(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['blog_post_id', id] })
       toast.success(isNew ? 'Entrada creada' : 'Entrada actualizada')
       navigate('/admin/blog')
     },

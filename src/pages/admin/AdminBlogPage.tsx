@@ -13,7 +13,7 @@ function BlogList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteBlogPost,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada') },
     onError: () => toast.error('Error al eliminar la entrada'),
   })
 

@@ -100,11 +100,11 @@ export default function AdminChapterEditPage() {
 
       await replacePanels(chapterId!, panelData)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chapters'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chapters'] })
       if (id) {
-        queryClient.invalidateQueries({ queryKey: ['chapter', id] })
-        queryClient.invalidateQueries({ queryKey: ['panels', id] })
+        await queryClient.invalidateQueries({ queryKey: ['chapter', id] })
+        await queryClient.invalidateQueries({ queryKey: ['panels', id] })
       }
       toast.success(isNew ? 'Capítulo creado' : 'Capítulo actualizado')
       navigate('/admin/capitulos')

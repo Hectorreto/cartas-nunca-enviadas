@@ -48,8 +48,9 @@ export default function AdminFragmentEditPage() {
       if (isNew) await createFragment(data)
       else await updateFragment(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fragments'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['fragments'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['fragment', id] })
       toast.success(isNew ? 'Fragmento creado' : 'Fragmento actualizado')
       navigate('/admin/fragmentos')
     },

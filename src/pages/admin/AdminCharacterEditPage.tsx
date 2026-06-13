@@ -55,9 +55,10 @@ export default function AdminCharacterEditPage() {
       if (isNew) await createCharacter(data)
       else await updateCharacter(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['characters'] })
-      toast.success(isNew ? 'Personaje creado' : 'Personaje actualizado')
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['characters'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['character', id] })
+        toast.success(isNew ? 'Personaje creado' : 'Personaje actualizado')
       navigate('/admin/personajes')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
