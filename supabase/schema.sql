@@ -136,3 +136,95 @@ create policy "profiles: no self role change"
   on public.profiles for update
   using (auth.uid() = id)
   with check (role = (select role from public.profiles where id = auth.uid()));
+
+-- ================================================================
+-- MIGRACIÓN 2: reading_progress
+-- ================================================================
+create table public.reading_progress (
+  user_id     uuid not null references public.profiles on delete cascade,
+  chapter_id  uuid not null references public.chapters on delete cascade,
+  panel_index integer not null default 0,
+  updated_at  timestamptz default now(),
+  primary key (user_id, chapter_id)
+);
+alter table public.reading_progress enable row level security;
+create policy "progress: own only"
+  on public.reading_progress for all
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ================================================================
+-- MIGRACIÓN 3: tablas de contenido (blog, personajes, fragmentos, extras)
+-- ================================================================
+create table public.blog_posts (
+  id           uuid primary key default gen_random_uuid(),
+  slug         text unique not null,
+  title        text not null,
+  excerpt      text not null,
+  content      text[] not null default '{}',
+  cover_url    text not null default '',
+  published_at date not null,
+  tag          text not null default '',
+  featured     boolean not null default false
+);
+alter table public.blog_posts enable row level security;
+create policy "blog_posts: public read" on public.blog_posts for select using (true);
+create policy "blog_posts: admin write" on public.blog_posts for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+
+create table public.characters (
+  id               uuid primary key default gen_random_uuid(),
+  name             text not null,
+  label            text not null,
+  tagline          text not null,
+  description      text not null,
+  portrait_url     text not null default '',
+  role             text not null check (role in ('main', 'secondary')),
+  traits           text[] not null default '{}',
+  first_appearance text not null default ''
+);
+alter table public.characters enable row level security;
+create policy "characters: public read" on public.characters for select using (true);
+create policy "characters: admin write" on public.characters for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+
+create table public.fragments (
+  id             uuid primary key default gen_random_uuid(),
+  title          text not null,
+  description    text not null,
+  image_url      text not null default '',
+  chapter_number integer not null,
+  chapter_title  text not null,
+  aspect         text not null default 'square' check (aspect in ('tall', 'wide', 'square'))
+);
+alter table public.fragments enable row level security;
+create policy "fragments: public read" on public.fragments for select using (true);
+create policy "fragments: admin write" on public.fragments for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+
+create table public.extras (
+  id           uuid primary key default gen_random_uuid(),
+  title        text not null,
+  category     text not null,
+  image_url    text not null default '',
+  download_url text,
+  description  text not null default ''
+);
+alter table public.extras enable row level security;
+create policy "extras: public read" on public.extras for select using (true);
+create policy "extras: admin write" on public.extras for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+
+-- ================================================================
+-- MIGRACIÓN 4: admin write en chapters y chapter_panels
+-- ================================================================
+create policy "chapters: admin write" on public.chapters for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+
+create policy "chapter_panels: admin write" on public.chapter_panels for all
+  using ((select role from public.profiles where id = auth.uid()) = 'admin')
+  with check ((select role from public.profiles where id = auth.uid()) = 'admin');

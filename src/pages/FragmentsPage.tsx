@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_FRAGMENTS } from '@/lib/mockData'
+import { getFragments } from '@/services/fragments'
 import type { Fragment } from '@/types'
 
 const aspectClass: Record<Fragment['aspect'], string> = {
@@ -19,6 +20,7 @@ const placeholderHeight: Record<Fragment['aspect'], string> = {
 
 export default function FragmentsPage() {
   const [selected, setSelected] = useState<Fragment | null>(null)
+  const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
 
   return (
     <Layout>
@@ -37,7 +39,7 @@ export default function FragmentsPage() {
 
       {/* Masonry grid */}
       <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
-        {MOCK_FRAGMENTS.map((f) => (
+        {fragments.map((f) => (
           <div
             key={f.id}
             className={`break-inside-avoid cursor-pointer group relative overflow-hidden rounded-sm border border-[#3a2e1e] hover:border-[#c9a96e]/50 transition-all ${aspectClass[f.aspect]}`}
@@ -65,15 +67,15 @@ export default function FragmentsPage() {
           fragment={selected}
           onClose={() => setSelected(null)}
           onPrev={() => {
-            const i = MOCK_FRAGMENTS.findIndex((f) => f.id === selected.id)
-            if (i > 0) setSelected(MOCK_FRAGMENTS[i - 1])
+            const i = fragments.findIndex((f) => f.id === selected.id)
+            if (i > 0) setSelected(fragments[i - 1])
           }}
           onNext={() => {
-            const i = MOCK_FRAGMENTS.findIndex((f) => f.id === selected.id)
-            if (i < MOCK_FRAGMENTS.length - 1) setSelected(MOCK_FRAGMENTS[i + 1])
+            const i = fragments.findIndex((f) => f.id === selected.id)
+            if (i < fragments.length - 1) setSelected(fragments[i + 1])
           }}
-          hasPrev={MOCK_FRAGMENTS.findIndex((f) => f.id === selected.id) > 0}
-          hasNext={MOCK_FRAGMENTS.findIndex((f) => f.id === selected.id) < MOCK_FRAGMENTS.length - 1}
+          hasPrev={fragments.findIndex((f) => f.id === selected.id) > 0}
+          hasNext={fragments.findIndex((f) => f.id === selected.id) < fragments.length - 1}
         />
       )}
     </Layout>

@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_CHARACTERS } from '@/lib/mockData'
+import { getCharacters } from '@/services/characters'
 import type { Character } from '@/types'
 
 export default function CharactersPage() {
   const [selected, setSelected] = useState<Character | null>(null)
+  const { data: characters = [] } = useQuery({ queryKey: ['characters'], queryFn: getCharacters })
 
-  const main = MOCK_CHARACTERS.filter((c) => c.role === 'main')
-  const secondary = MOCK_CHARACTERS.filter((c) => c.role === 'secondary')
+  const main = characters.filter((c) => c.role === 'main')
+  const secondary = characters.filter((c) => c.role === 'secondary')
 
   return (
     <Layout>
