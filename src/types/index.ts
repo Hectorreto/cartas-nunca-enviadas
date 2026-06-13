@@ -50,6 +50,17 @@ export interface Fragment {
   aspect: 'tall' | 'wide' | 'square'
 }
 
+export type ExtraCategory = 'Arte conceptual' | 'Wallpapers' | 'Bocetos' | 'Fan art'
+
+export interface Extra {
+  id: string
+  title: string
+  category: ExtraCategory
+  image_url: string
+  download_url?: string
+  description?: string
+}
+
 export interface BlogPost {
   id: string
   slug: string

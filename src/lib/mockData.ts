@@ -1,4 +1,4 @@
-import type { Chapter, Character, Fragment, BlogPost } from '@/types'
+import type { Chapter, Character, Fragment, Extra, BlogPost } from '@/types'
 
 export const MOCK_CHAPTERS: Chapter[] = [
   { id: '1',  number: 1,  title: 'El hombre que no tenía nada que enseñar', cover_url: '', published_at: '2024-05-12', is_free: true },
@@ -95,6 +95,17 @@ export const MOCK_FRAGMENTS: Fragment[] = [
   { id: '6', title: 'La tormenta de Milán',  description: 'Atrapados. Sin excusas. Sin salida.',             image_url: '', chapter_number: 5,  chapter_title: 'Cartas desde Milán',      aspect: 'tall'   },
   { id: '7', title: 'El espejo roto',        description: 'Lo que se ve cuando ya no hay máscaras.',          image_url: '', chapter_number: 7,  chapter_title: 'Lo que el silencio no pudo guardar', aspect: 'square' },
   { id: '8', title: 'La última llamada',     description: 'Una decisión. Dos destinos posibles.',             image_url: '', chapter_number: 10, chapter_title: 'La última carta',         aspect: 'wide'   },
+]
+
+export const MOCK_EXTRAS: Extra[] = [
+  { id: '1', title: 'Nikolai — diseño original',    category: 'Arte conceptual', image_url: '', description: 'El primer boceto del personaje antes de que encontrara su forma definitiva.' },
+  { id: '2', title: 'Valentina — primeras versiones', category: 'Arte conceptual', image_url: '', description: 'Tres iteraciones del diseño de Valentina antes de la versión final.' },
+  { id: '3', title: 'El apartamento de Nikolai',    category: 'Arte conceptual', image_url: '', description: 'Concept art del espacio donde transcurre buena parte de la historia.' },
+  { id: '4', title: 'Wallpaper — El piano',          category: 'Wallpapers',      image_url: '', download_url: '#', description: '1920×1080 y 1080×1920 para móvil.' },
+  { id: '5', title: 'Wallpaper — Cartas',            category: 'Wallpapers',      image_url: '', download_url: '#', description: '1920×1080 y 1080×1920 para móvil.' },
+  { id: '6', title: 'Bocetos — Capítulo 3',          category: 'Bocetos',         image_url: '', description: 'Thumbnails y bocetos de la escena debajo del escritorio.' },
+  { id: '7', title: 'Bocetos — Capítulo 4',          category: 'Bocetos',         image_url: '', description: 'El proceso de composición de la escena del piano.' },
+  { id: '8', title: 'Fan art de @LectoraNocturna',   category: 'Fan art',         image_url: '', description: 'Compartido con permiso de la artista.' },
 ]
 
 export const MOCK_POSTS: BlogPost[] = [

@@ -10,6 +10,7 @@ import CharactersPage from '@/pages/CharactersPage'
 import FragmentsPage from '@/pages/FragmentsPage'
 import BlogPage from '@/pages/BlogPage'
 import BlogPostPage from '@/pages/BlogPostPage'
+import ExtrasPage from '@/pages/ExtrasPage'
 import ReaderPage from '@/pages/ReaderPage'
 
 const queryClient = new QueryClient({
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/fragmentos" element={<FragmentsPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/extras" element={<ExtrasPage />} />
           <Route path="/leer/:chapterId" element={<ReaderPage />} />
         </Routes>
         <AuthModal />
