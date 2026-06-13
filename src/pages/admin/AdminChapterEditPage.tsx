@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,16 +13,13 @@ import { uploadFile } from '@/lib/storage'
 import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 import PanelUploader, { type PanelSlot } from '@/components/admin/PanelUploader'
+import type { Chapter, ChapterPanel } from '@/types'
 
 const inputClass =
   'w-full bg-[#1a1510] border border-[#3a2e1e] text-[#d4c4a0] text-[13px] px-3 py-2.5 rounded-sm outline-none placeholder-[#6a5a40] focus:border-[#c9a96e] transition-colors'
 
 export default function AdminChapterEditPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isNew = !id
-  const [newId] = useState(() => `new-${Date.now()}`)
 
   const { data: chapter } = useQuery({
     queryKey: ['chapter', id],
@@ -36,34 +33,46 @@ export default function AdminChapterEditPage() {
     enabled: !!id,
   })
 
-  const [number, setNumber] = useState('')
-  const [title, setTitle] = useState('')
-  const [publishedAt, setPublishedAt] = useState(new Date().toISOString().split('T')[0])
-  const [isFree, setIsFree] = useState(true)
-  const [coverUrl, setCoverUrl] = useState('')
-  const [panels, setPanels] = useState<PanelSlot[]>([])
+  return (
+    <ChapterForm
+      key={chapter?.id ?? 'new'}
+      id={id}
+      chapter={chapter}
+      existingPanels={existingPanels}
+    />
+  )
+}
 
-  useEffect(() => {
-    if (!chapter) return
-    setNumber(String(chapter.number))
-    setTitle(chapter.title)
-    setPublishedAt(chapter.published_at.split('T')[0])
-    setIsFree(chapter.is_free)
-    setCoverUrl(chapter.cover_url)
-  }, [chapter])
+function ChapterForm({
+  id,
+  chapter,
+  existingPanels,
+}: {
+  id?: string
+  chapter?: Chapter
+  existingPanels: ChapterPanel[]
+}) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
 
-  useEffect(() => {
-    if (!existingPanels.length) return
-    setPanels(
-      existingPanels.map((p) => ({
-        id: p.id,
-        previewUrl: p.image_url,
-        url: p.image_url,
-        width: p.width,
-        height: p.height,
-      }))
-    )
-  }, [existingPanels])
+  const [number, setNumber] = useState(chapter ? String(chapter.number) : '')
+  const [title, setTitle] = useState(chapter?.title ?? '')
+  const [publishedAt, setPublishedAt] = useState(
+    chapter ? chapter.published_at.split('T')[0] : new Date().toISOString().split('T')[0]
+  )
+  const [isFree, setIsFree] = useState(chapter?.is_free ?? true)
+  const [coverUrl, setCoverUrl] = useState(chapter?.cover_url ?? '')
+  const [panels, setPanels] = useState<PanelSlot[]>(() =>
+    existingPanels.map((p) => ({
+      id: p.id,
+      previewUrl: p.image_url,
+      url: p.image_url,
+      width: p.width,
+      height: p.height,
+    }))
+  )
 
   const saveMutation = useMutation({
     mutationFn: async () => {

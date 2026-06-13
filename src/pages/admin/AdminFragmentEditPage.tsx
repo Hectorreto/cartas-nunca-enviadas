@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -15,33 +15,27 @@ const ASPECT_LABELS: Record<Fragment['aspect'], string> = { tall: 'Vertical', wi
 
 export default function AdminFragmentEditPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isNew = !id
-  const [newId] = useState(() => `new-${Date.now()}`)
-
   const { data: fragment } = useQuery({
     queryKey: ['fragment', id],
     queryFn: () => getFragment(id!),
     enabled: !!id,
   })
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [chapterNumber, setChapterNumber] = useState('')
-  const [chapterTitle, setChapterTitle] = useState('')
-  const [aspect, setAspect] = useState<Fragment['aspect']>('square')
+  return <FragmentForm key={fragment?.id ?? 'new'} id={id} fragment={fragment} />
+}
 
-  useEffect(() => {
-    if (!fragment) return
-    setTitle(fragment.title)
-    setDescription(fragment.description)
-    setImageUrl(fragment.image_url)
-    setChapterNumber(String(fragment.chapter_number))
-    setChapterTitle(fragment.chapter_title)
-    setAspect(fragment.aspect)
-  }, [fragment])
+function FragmentForm({ id, fragment }: { id?: string; fragment?: Fragment }) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
+
+  const [title, setTitle] = useState(fragment?.title ?? '')
+  const [description, setDescription] = useState(fragment?.description ?? '')
+  const [imageUrl, setImageUrl] = useState(fragment?.image_url ?? '')
+  const [chapterNumber, setChapterNumber] = useState(fragment ? String(fragment.chapter_number) : '')
+  const [chapterTitle, setChapterTitle] = useState(fragment?.chapter_title ?? '')
+  const [aspect, setAspect] = useState<Fragment['aspect']>(fragment?.aspect ?? 'square')
 
   const saveMutation = useMutation({
     mutationFn: async () => {

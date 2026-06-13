@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getExtra, createExtra, updateExtra } from '@/services/extras'
 import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
-import type { ExtraCategory } from '@/types'
+import type { Extra, ExtraCategory } from '@/types'
 
 const inputClass =
   'w-full bg-[#1a1510] border border-[#3a2e1e] text-[#d4c4a0] text-[13px] px-3 py-2.5 rounded-sm outline-none placeholder-[#6a5a40] focus:border-[#c9a96e] transition-colors'
@@ -14,31 +14,26 @@ const CATEGORIES: ExtraCategory[] = ['Arte conceptual', 'Wallpapers', 'Bocetos',
 
 export default function AdminExtraEditPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isNew = !id
-  const [newId] = useState(() => `new-${Date.now()}`)
-
   const { data: extra } = useQuery({
     queryKey: ['extra', id],
     queryFn: () => getExtra(id!),
     enabled: !!id,
   })
 
-  const [title, setTitle] = useState('')
-  const [category, setCategory] = useState<ExtraCategory>('Arte conceptual')
-  const [imageUrl, setImageUrl] = useState('')
-  const [downloadUrl, setDownloadUrl] = useState('')
-  const [description, setDescription] = useState('')
+  return <ExtraForm key={extra?.id ?? 'new'} id={id} extra={extra} />
+}
 
-  useEffect(() => {
-    if (!extra) return
-    setTitle(extra.title)
-    setCategory(extra.category as ExtraCategory)
-    setImageUrl(extra.image_url)
-    setDownloadUrl(extra.download_url ?? '')
-    setDescription(extra.description ?? '')
-  }, [extra])
+function ExtraForm({ id, extra }: { id?: string; extra?: Extra }) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
+
+  const [title, setTitle] = useState(extra?.title ?? '')
+  const [category, setCategory] = useState<ExtraCategory>((extra?.category as ExtraCategory) ?? 'Arte conceptual')
+  const [imageUrl, setImageUrl] = useState(extra?.image_url ?? '')
+  const [downloadUrl, setDownloadUrl] = useState(extra?.download_url ?? '')
+  const [description, setDescription] = useState(extra?.description ?? '')
 
   const saveMutation = useMutation({
     mutationFn: async () => {
