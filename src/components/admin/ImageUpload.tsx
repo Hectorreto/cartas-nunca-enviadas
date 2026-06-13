@@ -30,7 +30,7 @@ export default function ImageUpload({ value, storagePath, label = 'Imagen', onCh
         className="relative w-full aspect-video bg-[#1a1510] border border-[#3a2e1e] rounded-sm overflow-hidden cursor-pointer hover:border-[#c9a96e]/50 transition-all group"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) void handleFile(f) }}
       >
         {value ? (
           <>
@@ -56,7 +56,7 @@ export default function ImageUpload({ value, storagePath, label = 'Imagen', onCh
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f) }}
       />
     </div>
   )

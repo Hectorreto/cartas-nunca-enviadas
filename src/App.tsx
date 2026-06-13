@@ -42,7 +42,7 @@ export default function App() {
       setAuthReady()
     }
 
-    initAuth()
+    void initAuth()
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)

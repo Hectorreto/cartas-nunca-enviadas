@@ -123,7 +123,7 @@ export default function PanelUploader({ panels, onChange }: Props) {
         accept="image/*"
         multiple
         className="hidden"
-        onChange={(e) => { if (e.target.files?.length) handleFiles(e.target.files) }}
+        onChange={(e) => { if (e.target.files?.length) void handleFiles(e.target.files) }}
       />
     </div>
   )
