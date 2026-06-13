@@ -120,9 +120,26 @@ create policy "comic bucket: public read"
   on storage.objects for select
   using (bucket_id = 'comic');
 
-create policy "comic bucket: auth upload"
+create policy "comic bucket: admin insert"
   on storage.objects for insert
-  with check (bucket_id = 'comic' and auth.role() = 'authenticated');
+  with check (
+    bucket_id = 'comic'
+    and (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
+
+create policy "comic bucket: admin update"
+  on storage.objects for update
+  using (
+    bucket_id = 'comic'
+    and (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
+
+create policy "comic bucket: admin delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'comic'
+    and (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
 
 -- ================================================================
 -- MIGRACIÓN 1: role en profiles
