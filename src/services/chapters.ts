@@ -39,3 +39,18 @@ export async function getChapterComments(chapterId: string): Promise<Comment[]> 
   if (error) throw error
   return data as Comment[]
 }
+
+export async function postComment(chapterId: string, userId: string, content: string): Promise<void> {
+  const { error } = await supabase
+    .from('comments')
+    .insert({ chapter_id: chapterId, user_id: userId, content })
+  if (error) throw error
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId)
+  if (error) throw error
+}
