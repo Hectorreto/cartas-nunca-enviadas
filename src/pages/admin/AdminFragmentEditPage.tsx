@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFragment, createFragment, updateFragment } from '@/services/fragments'
+import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 import type { Fragment } from '@/types'
 
@@ -49,8 +50,10 @@ export default function AdminFragmentEditPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fragments'] })
+      toast.success(isNew ? 'Fragmento creado' : 'Fragmento actualizado')
       navigate('/admin/fragmentos')
     },
+    onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
 
   return (
@@ -111,10 +114,6 @@ export default function AdminFragmentEditPage() {
         {/* Imagen */}
         <ImageUpload value={imageUrl} storagePath={`fragments/${id ?? `new-${Date.now()}`}/image.jpg`}
           label="Imagen del fragmento" onChange={setImageUrl} />
-
-        {saveMutation.isError && (
-          <p className="text-[12px] text-red-400">Error al guardar. Inténtalo de nuevo.</p>
-        )}
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !title}

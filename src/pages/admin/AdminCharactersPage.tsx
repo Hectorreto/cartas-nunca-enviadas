@@ -2,6 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getCharacters, deleteCharacter } from '@/services/characters'
+import { toast } from '@/lib/toast'
 import AdminCharacterEditPage from './AdminCharacterEditPage'
 
 function CharacterList() {
@@ -11,7 +12,8 @@ function CharacterList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteCharacter,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['characters'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado') },
+    onError: () => toast.error('Error al eliminar el personaje'),
   })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>

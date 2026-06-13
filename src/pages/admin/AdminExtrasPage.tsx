@@ -2,6 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getExtras, deleteExtra } from '@/services/extras'
+import { toast } from '@/lib/toast'
 import AdminExtraEditPage from './AdminExtraEditPage'
 
 function ExtraList() {
@@ -11,7 +12,8 @@ function ExtraList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteExtra,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['extras'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado') },
+    onError: () => toast.error('Error al eliminar el extra'),
   })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>

@@ -2,6 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFragments, deleteFragment } from '@/services/fragments'
+import { toast } from '@/lib/toast'
 import AdminFragmentEditPage from './AdminFragmentEditPage'
 
 function FragmentList() {
@@ -11,7 +12,8 @@ function FragmentList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteFragment,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['fragments'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['fragments'] }); toast.success('Fragmento eliminado') },
+    onError: () => toast.error('Error al eliminar el fragmento'),
   })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>
