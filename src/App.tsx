@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import AuthModal from '@/components/auth/AuthModal'
 import HomePage from '@/pages/HomePage'
 import ChaptersPage from '@/pages/ChaptersPage'
+import CharactersPage from '@/pages/CharactersPage'
 import ReaderPage from '@/pages/ReaderPage'
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/capitulos" element={<ChaptersPage />} />
+          <Route path="/personajes" element={<CharactersPage />} />
           <Route path="/leer/:chapterId" element={<ReaderPage />} />
         </Routes>
         <AuthModal />

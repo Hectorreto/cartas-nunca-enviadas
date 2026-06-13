@@ -19,9 +19,13 @@ export interface ChapterPanel {
 export interface Character {
   id: string
   name: string
+  label: string
+  tagline: string
   description: string
   portrait_url: string
   role: 'main' | 'secondary'
+  traits: string[]
+  first_appearance: string
 }
 
 export interface Comment {
