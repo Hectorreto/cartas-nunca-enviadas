@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import AuthModal from '@/components/auth/AuthModal'
 import HomePage from '@/pages/HomePage'
 import ChaptersPage from '@/pages/ChaptersPage'
 import ReaderPage from '@/pages/ReaderPage'
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/capitulos" element={<ChaptersPage />} />
           <Route path="/leer/:chapterId" element={<ReaderPage />} />
         </Routes>
+        <AuthModal />
       </BrowserRouter>
     </QueryClientProvider>
   )

@@ -1,5 +1,8 @@
-import { Search } from 'lucide-react'
+import { Search, LogOut, User } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/authStore'
+import { useUiStore } from '@/store/uiStore'
 
 const navLinks = [
   { to: '/', label: 'INICIO' },
@@ -11,6 +14,9 @@ const navLinks = [
 ]
 
 export default function Navbar() {
+  const user = useAuthStore((s) => s.user)
+  const openAuthModal = useUiStore((s) => s.openAuthModal)
+
   return (
     <header className="sticky top-0 z-50 bg-[#0d0b08]/95 backdrop-blur border-b border-[#3a2e1e]">
       <div className="max-w-[1400px] mx-auto px-6 flex items-center gap-8 h-16">
@@ -52,12 +58,39 @@ export default function Navbar() {
               className="bg-transparent text-[13px] text-[#d4c4a0] placeholder-[#8a7a60] outline-none w-32"
             />
           </div>
-          <button className="text-[11px] tracking-widest text-[#8a7a60] hover:text-[#d4c4a0] transition-colors uppercase">
-            Iniciar Sesión
-          </button>
-          <button className="text-[11px] tracking-widest bg-transparent border border-[#c9a96e] text-[#c9a96e] hover:bg-[#c9a96e] hover:text-[#0d0b08] transition-all px-4 py-1.5 uppercase">
-            Regístrate
-          </button>
+
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-[#c9a96e]">
+                <User size={14} />
+                <span className="text-[11px] tracking-wider hidden sm:block">
+                  {user.user_metadata?.username ?? user.email?.split('@')[0]}
+                </span>
+              </div>
+              <button
+                onClick={() => supabase.auth.signOut()}
+                className="p-1.5 text-[#8a7a60] hover:text-[#d4c4a0] transition-colors"
+                title="Cerrar sesión"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => openAuthModal('login')}
+                className="text-[11px] tracking-widest text-[#8a7a60] hover:text-[#d4c4a0] transition-colors uppercase"
+              >
+                Iniciar Sesión
+              </button>
+              <button
+                onClick={() => openAuthModal('register')}
+                className="text-[11px] tracking-widest bg-transparent border border-[#c9a96e] text-[#c9a96e] hover:bg-[#c9a96e] hover:text-[#0d0b08] transition-all px-4 py-1.5 uppercase"
+              >
+                Regístrate
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
