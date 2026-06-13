@@ -52,7 +52,7 @@ export default function AdminFragmentEditPage() {
       await queryClient.invalidateQueries({ queryKey: ['fragments'] })
       if (!isNew) await queryClient.invalidateQueries({ queryKey: ['fragment', id] })
       toast.success(isNew ? 'Fragmento creado' : 'Fragmento actualizado')
-      navigate('/admin/fragmentos')
+      await navigate('/admin/fragmentos')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })

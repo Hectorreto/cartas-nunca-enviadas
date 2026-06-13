@@ -107,7 +107,7 @@ export default function AdminChapterEditPage() {
         await queryClient.invalidateQueries({ queryKey: ['panels', id] })
       }
       toast.success(isNew ? 'Capítulo creado' : 'Capítulo actualizado')
-      navigate('/admin/capitulos')
+      await navigate('/admin/capitulos')
     },
     onError: () => toast.error('Error al guardar. Verifica los datos e inténtalo de nuevo.'),
   })

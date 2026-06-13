@@ -78,7 +78,7 @@ export default function AdminBlogEditPage() {
       await queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
       if (!isNew) await queryClient.invalidateQueries({ queryKey: ['blog_post_id', id] })
       toast.success(isNew ? 'Entrada creada' : 'Entrada actualizada')
-      navigate('/admin/blog')
+      await navigate('/admin/blog')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })

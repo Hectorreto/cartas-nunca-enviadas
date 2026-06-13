@@ -55,7 +55,7 @@ export default function AdminExtraEditPage() {
       await queryClient.invalidateQueries({ queryKey: ['extras'] })
       if (!isNew) await queryClient.invalidateQueries({ queryKey: ['extra', id] })
       toast.success(isNew ? 'Extra creado' : 'Extra actualizado')
-      navigate('/admin/extras')
+      await navigate('/admin/extras')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
