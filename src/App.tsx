@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { RequireAdmin } from '@/components/ProtectedRoute'
 import AuthModal from '@/components/auth/AuthModal'
 import HomePage from '@/pages/HomePage'
 import ChaptersPage from '@/pages/ChaptersPage'
@@ -12,26 +13,46 @@ import BlogPage from '@/pages/BlogPage'
 import BlogPostPage from '@/pages/BlogPostPage'
 import ExtrasPage from '@/pages/ExtrasPage'
 import ReaderPage from '@/pages/ReaderPage'
+import AdminPage from '@/pages/admin/AdminPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-    },
+    queries: { staleTime: 1000 * 60 * 5, retry: 1 },
   },
 })
 
 export default function App() {
-  const setSession = useAuthStore((s) => s.setSession)
+  const { setSession, setProfile } = useAuthStore()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) =>
+    async function initAuth() {
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
+      if (data.session?.user) await fetchProfile(data.session.user.id)
+    }
+
+    async function fetchProfile(userId: string) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('role, username, avatar_url')
+        .eq('id', userId)
+        .single()
+      if (data) setProfile({ role: data.role ?? 'reader', username: data.username, avatar_url: data.avatar_url })
+    }
+
+    initAuth()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
-    )
+      if (session?.user) {
+        await fetchProfile(session.user.id)
+      } else {
+        setProfile(null)
+      }
+    })
+
     return () => listener.subscription.unsubscribe()
-  }, [setSession])
+  }, [setSession, setProfile])
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -45,6 +66,7 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/extras" element={<ExtrasPage />} />
           <Route path="/leer/:chapterId" element={<ReaderPage />} />
+          <Route path="/admin/*" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
         </Routes>
         <AuthModal />
       </BrowserRouter>

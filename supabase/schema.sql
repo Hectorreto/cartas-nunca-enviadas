@@ -123,3 +123,16 @@ create policy "comic bucket: public read"
 create policy "comic bucket: auth upload"
   on storage.objects for insert
   with check (bucket_id = 'comic' and auth.role() = 'authenticated');
+
+-- ================================================================
+-- MIGRACIÓN 1: role en profiles
+-- ================================================================
+alter table public.profiles
+  add column role text not null default 'reader'
+  check (role in ('reader', 'admin'));
+
+-- Impide que un usuario cambie su propio rol
+create policy "profiles: no self role change"
+  on public.profiles for update
+  using (auth.uid() = id)
+  with check (role = (select role from public.profiles where id = auth.uid()));
