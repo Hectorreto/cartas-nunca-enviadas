@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getChapter, getChapters, getChapterPanels } from '@/services/chapters'
 import { useReadingStore } from '@/store/readingStore'
+import { useReadingSync } from '@/hooks/useReadingSync'
 import ReaderHeader from '@/components/reader/ReaderHeader'
 import PanelList from '@/components/reader/PanelList'
 import ChapterNav from '@/components/reader/ChapterNav'
@@ -29,6 +30,8 @@ export default function ReaderPage() {
     queryFn: () => getChapterPanels(chapterId!),
     enabled: !!chapterId,
   })
+
+  useReadingSync(chapterId ?? '')
 
   const handleProgressChange = useCallback(
     (p: number) => {
