@@ -5,18 +5,7 @@ import { useUiStore } from '@/store/uiStore'
 
 export default function AuthModal() {
   const { authModalOpen, authModalTab, closeAuthModal, openAuthModal } = useUiStore()
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
-
-  // Reset state when tab or open changes
-  useEffect(() => {
-    setError(null)
-    setSuccess(null)
-    setShowPassword(false)
-  }, [authModalTab, authModalOpen])
 
   // Close on Escape
   useEffect(() => {
@@ -30,6 +19,66 @@ export default function AuthModal() {
     document.body.style.overflow = authModalOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [authModalOpen])
+
+  if (!authModalOpen) return null
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === overlayRef.current) closeAuthModal() }}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-sm bg-[#1a1510] border border-[#3a2e1e] rounded-sm shadow-2xl">
+        {/* Close */}
+        <button
+          onClick={closeAuthModal}
+          className="absolute top-4 right-4 text-[#8a7a60] hover:text-[#d4c4a0] transition-colors"
+        >
+          <X size={16} />
+        </button>
+
+        {/* Header */}
+        <div className="px-8 pt-8 pb-6 border-b border-[#3a2e1e] text-center">
+          <p className="font-serif italic text-xl text-[#c9a96e]">Cartas</p>
+          <p className="text-[9px] tracking-[0.2em] text-[#8a7a60] uppercase mt-0.5">
+            que nunca fueron enviadas
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-[#3a2e1e]">
+          {(['login', 'register'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => openAuthModal(tab)}
+              className={`flex-1 py-3 text-[11px] tracking-widest uppercase transition-all ${
+                authModalTab === tab
+                  ? 'text-[#c9a96e] border-b-2 border-[#c9a96e] -mb-px'
+                  : 'text-[#8a7a60] hover:text-[#d4c4a0]'
+              }`}
+            >
+              {tab === 'login' ? 'Iniciar sesión' : 'Registrarse'}
+            </button>
+          ))}
+        </div>
+
+        {/* key resets error/success/showPassword on tab switch */}
+        <ModalForms key={authModalTab} />
+      </div>
+    </div>
+  )
+}
+
+function ModalForms() {
+  const { authModalTab, closeAuthModal } = useUiStore()
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -78,138 +127,91 @@ export default function AuthModal() {
     }
   }
 
-  if (!authModalOpen) return null
-
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      onClick={(e) => { if (e.target === overlayRef.current) closeAuthModal() }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+    <div className="px-8 py-6">
+      {/* Error / Success */}
+      {error && (
+        <p className="mb-4 text-[12px] text-red-400 bg-red-400/10 border border-red-400/20 rounded-sm px-3 py-2">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className="mb-4 text-[12px] text-[#c9a96e] bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-sm px-3 py-2">
+          {success}
+        </p>
+      )}
 
-      {/* Modal */}
-      <div className="relative w-full max-w-sm bg-[#1a1510] border border-[#3a2e1e] rounded-sm shadow-2xl">
-        {/* Close */}
-        <button
-          onClick={closeAuthModal}
-          className="absolute top-4 right-4 text-[#8a7a60] hover:text-[#d4c4a0] transition-colors"
-        >
-          <X size={16} />
-        </button>
+      {/* Login form */}
+      {authModalTab === 'login' && (
+        <form onSubmit={handleLogin} className="space-y-4">
+          <Field label="Email">
+            <input
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={inputClass}
+              placeholder="tu@email.com"
+            />
+          </Field>
+          <Field label="Contraseña">
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                className={`${inputClass} pr-10`}
+                placeholder="••••••••"
+              />
+              <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
+            </div>
+          </Field>
+          <SubmitButton loading={loading}>Iniciar sesión</SubmitButton>
+        </form>
+      )}
 
-        {/* Header */}
-        <div className="px-8 pt-8 pb-6 border-b border-[#3a2e1e] text-center">
-          <p className="font-serif italic text-xl text-[#c9a96e]">Cartas</p>
-          <p className="text-[9px] tracking-[0.2em] text-[#8a7a60] uppercase mt-0.5">
-            que nunca fueron enviadas
-          </p>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b border-[#3a2e1e]">
-          {(['login', 'register'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => openAuthModal(tab)}
-              className={`flex-1 py-3 text-[11px] tracking-widest uppercase transition-all ${
-                authModalTab === tab
-                  ? 'text-[#c9a96e] border-b-2 border-[#c9a96e] -mb-px'
-                  : 'text-[#8a7a60] hover:text-[#d4c4a0]'
-              }`}
-            >
-              {tab === 'login' ? 'Iniciar sesión' : 'Registrarse'}
-            </button>
-          ))}
-        </div>
-
-        <div className="px-8 py-6">
-          {/* Error / Success */}
-          {error && (
-            <p className="mb-4 text-[12px] text-red-400 bg-red-400/10 border border-red-400/20 rounded-sm px-3 py-2">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="mb-4 text-[12px] text-[#c9a96e] bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-sm px-3 py-2">
-              {success}
-            </p>
-          )}
-
-          {/* Login form */}
-          {authModalTab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Field label="Email">
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className={inputClass}
-                  placeholder="tu@email.com"
-                />
-              </Field>
-              <Field label="Contraseña">
-                <div className="relative">
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    autoComplete="current-password"
-                    className={`${inputClass} pr-10`}
-                    placeholder="••••••••"
-                  />
-                  <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
-                </div>
-              </Field>
-              <SubmitButton loading={loading}>Iniciar sesión</SubmitButton>
-            </form>
-          )}
-
-          {/* Register form */}
-          {authModalTab === 'register' && !success && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <Field label="Nombre de usuario">
-                <input
-                  name="username"
-                  type="text"
-                  required
-                  minLength={3}
-                  autoComplete="username"
-                  className={inputClass}
-                  placeholder="LectoraNocturna"
-                />
-              </Field>
-              <Field label="Email">
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className={inputClass}
-                  placeholder="tu@email.com"
-                />
-              </Field>
-              <Field label="Contraseña">
-                <div className="relative">
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                    className={`${inputClass} pr-10`}
-                    placeholder="Mínimo 6 caracteres"
-                  />
-                  <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
-                </div>
-              </Field>
-              <SubmitButton loading={loading}>Crear cuenta</SubmitButton>
-            </form>
-          )}
-        </div>
-      </div>
+      {/* Register form */}
+      {authModalTab === 'register' && !success && (
+        <form onSubmit={handleRegister} className="space-y-4">
+          <Field label="Nombre de usuario">
+            <input
+              name="username"
+              type="text"
+              required
+              minLength={3}
+              autoComplete="username"
+              className={inputClass}
+              placeholder="LectoraNocturna"
+            />
+          </Field>
+          <Field label="Email">
+            <input
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className={inputClass}
+              placeholder="tu@email.com"
+            />
+          </Field>
+          <Field label="Contraseña">
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className={`${inputClass} pr-10`}
+                placeholder="Mínimo 6 caracteres"
+              />
+              <PasswordToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />
+            </div>
+          </Field>
+          <SubmitButton loading={loading}>Crear cuenta</SubmitButton>
+        </form>
+      )}
     </div>
   )
 }

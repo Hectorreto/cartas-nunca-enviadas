@@ -14,7 +14,7 @@ export function useReadingSync(chapterId: string) {
     if (!userId || !chapterId) return
     fetchChapterProgress(userId, chapterId).then((panelIndex) => {
       if (panelIndex !== null) setProgress(chapterId, panelIndex)
-    })
+    }).catch(() => {})
   }, [userId, chapterId, setProgress])
 
   // On scroll: debounced upsert to Supabase

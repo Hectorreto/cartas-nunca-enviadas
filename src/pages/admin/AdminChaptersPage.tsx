@@ -16,7 +16,7 @@ function ChapterList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteChapter,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado') },
     onError: () => toast.error('Error al eliminar el capítulo'),
   })
 

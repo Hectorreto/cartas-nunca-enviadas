@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2, Plus, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlogPostById, createBlogPost, updateBlogPost } from '@/services/blog'
 import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
+import type { BlogPost } from '@/types'
 
 const inputClass =
   'w-full bg-[#1a1510] border border-[#3a2e1e] text-[#d4c4a0] text-[13px] px-3 py-2.5 rounded-sm outline-none placeholder-[#6a5a40] focus:border-[#c9a96e] transition-colors'
@@ -21,38 +22,30 @@ function slugify(text: string) {
 
 export default function AdminBlogEditPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isNew = !id
-
   const { data: post } = useQuery({
     queryKey: ['blog_post_id', id],
     queryFn: () => getBlogPostById(id!),
     enabled: !!id,
   })
 
-  const [slug, setSlug] = useState('')
-  const [title, setTitle] = useState('')
-  const [excerpt, setExcerpt] = useState('')
-  const [content, setContent] = useState<string[]>([''])
-  const [coverUrl, setCoverUrl] = useState('')
-  const [publishedAt, setPublishedAt] = useState(new Date().toISOString().split('T')[0])
-  const [tag, setTag] = useState('')
-  const [featured, setFeatured] = useState(false)
-  const [slugManual, setSlugManual] = useState(false)
+  return <BlogForm key={post?.id ?? 'new'} id={id} post={post} />
+}
 
-  useEffect(() => {
-    if (!post) return
-    setSlug(post.slug)
-    setTitle(post.title)
-    setExcerpt(post.excerpt)
-    setContent(post.content.length ? post.content : [''])
-    setCoverUrl(post.cover_url)
-    setPublishedAt(post.published_at)
-    setTag(post.tag)
-    setFeatured(post.featured)
-    setSlugManual(true)
-  }, [post])
+function BlogForm({ id, post }: { id?: string; post?: BlogPost }) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
+
+  const [slug, setSlug] = useState(post?.slug ?? '')
+  const [title, setTitle] = useState(post?.title ?? '')
+  const [excerpt, setExcerpt] = useState(post?.excerpt ?? '')
+  const [content, setContent] = useState<string[]>(post?.content.length ? post.content : [''])
+  const [coverUrl, setCoverUrl] = useState(post?.cover_url ?? '')
+  const [publishedAt, setPublishedAt] = useState(post?.published_at ?? new Date().toISOString().split('T')[0])
+  const [tag, setTag] = useState(post?.tag ?? '')
+  const [featured, setFeatured] = useState(post?.featured ?? false)
+  const [slugManual, setSlugManual] = useState(!!post)
 
   function handleTitleChange(val: string) {
     setTitle(val)
@@ -74,10 +67,11 @@ export default function AdminBlogEditPage() {
       if (isNew) await createBlogPost(data)
       else await updateBlogPost(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['blog_post_id', id] })
       toast.success(isNew ? 'Entrada creada' : 'Entrada actualizada')
-      navigate('/admin/blog')
+      await navigate('/admin/blog')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
@@ -141,7 +135,7 @@ export default function AdminBlogEditPage() {
         </div>
 
         {/* Portada */}
-        <ImageUpload value={coverUrl} storagePath={`blog/${id ?? `new-${Date.now()}`}/cover.jpg`}
+        <ImageUpload value={coverUrl} storagePath={`blog/${id ?? newId}/cover.jpg`}
           label="Imagen de portada" onChange={setCoverUrl} />
 
         {/* Contenido */}

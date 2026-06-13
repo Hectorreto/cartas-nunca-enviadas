@@ -12,7 +12,7 @@ function FragmentList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteFragment,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['fragments'] }); toast.success('Fragmento eliminado') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['fragments'] }); toast.success('Fragmento eliminado') },
     onError: () => toast.error('Error al eliminar el fragmento'),
   })
 

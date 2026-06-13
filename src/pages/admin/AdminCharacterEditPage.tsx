@@ -1,47 +1,41 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getCharacter, createCharacter, updateCharacter } from '@/services/characters'
 import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
+import type { Character } from '@/types'
 
 const inputClass =
   'w-full bg-[#1a1510] border border-[#3a2e1e] text-[#d4c4a0] text-[13px] px-3 py-2.5 rounded-sm outline-none placeholder-[#6a5a40] focus:border-[#c9a96e] transition-colors'
 
 export default function AdminCharacterEditPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isNew = !id
-  const traitInputRef = useRef<HTMLInputElement>(null)
-
   const { data: character } = useQuery({
     queryKey: ['character', id],
     queryFn: () => getCharacter(id!),
     enabled: !!id,
   })
 
-  const [name, setName] = useState('')
-  const [label, setLabel] = useState('')
-  const [tagline, setTagline] = useState('')
-  const [description, setDescription] = useState('')
-  const [portraitUrl, setPortraitUrl] = useState('')
-  const [role, setRole] = useState<'main' | 'secondary'>('secondary')
-  const [traits, setTraits] = useState<string[]>([])
-  const [firstAppearance, setFirstAppearance] = useState('')
+  return <CharacterForm key={character?.id ?? 'new'} id={id} character={character} />
+}
 
-  useEffect(() => {
-    if (!character) return
-    setName(character.name)
-    setLabel(character.label)
-    setTagline(character.tagline)
-    setDescription(character.description)
-    setPortraitUrl(character.portrait_url)
-    setRole(character.role as 'main' | 'secondary')
-    setTraits(character.traits)
-    setFirstAppearance(character.first_appearance)
-  }, [character])
+function CharacterForm({ id, character }: { id?: string; character?: Character }) {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const isNew = !id
+  const [newId] = useState(() => `new-${Date.now()}`)
+  const traitInputRef = useRef<HTMLInputElement>(null)
+
+  const [name, setName] = useState(character?.name ?? '')
+  const [label, setLabel] = useState(character?.label ?? '')
+  const [tagline, setTagline] = useState(character?.tagline ?? '')
+  const [description, setDescription] = useState(character?.description ?? '')
+  const [portraitUrl, setPortraitUrl] = useState(character?.portrait_url ?? '')
+  const [role, setRole] = useState<'main' | 'secondary'>((character?.role as 'main' | 'secondary') ?? 'secondary')
+  const [traits, setTraits] = useState<string[]>(character?.traits ?? [])
+  const [firstAppearance, setFirstAppearance] = useState(character?.first_appearance ?? '')
 
   function addTrait(value: string) {
     const trimmed = value.trim()
@@ -55,10 +49,11 @@ export default function AdminCharacterEditPage() {
       if (isNew) await createCharacter(data)
       else await updateCharacter(id!, data)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['characters'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['characters'] })
+      if (!isNew) await queryClient.invalidateQueries({ queryKey: ['character', id] })
       toast.success(isNew ? 'Personaje creado' : 'Personaje actualizado')
-      navigate('/admin/personajes')
+      await navigate('/admin/personajes')
     },
     onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
@@ -145,7 +140,7 @@ export default function AdminCharacterEditPage() {
         </div>
 
         {/* Retrato */}
-        <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? `new-${Date.now()}`}/portrait.jpg`}
+        <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? newId}/portrait.jpg`}
           label="Retrato del personaje" onChange={setPortraitUrl} />
 
         <div className="flex gap-3 pt-2">

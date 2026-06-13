@@ -12,7 +12,7 @@ function CharacterList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteCharacter,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado') },
     onError: () => toast.error('Error al eliminar el personaje'),
   })
 
