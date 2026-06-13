@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_POSTS, formatChapterDate } from '@/lib/mockData'
+import { getBlogPosts } from '@/services/blog'
+import { formatChapterDate } from '@/lib/mockData'
 
 export default function BlogPage() {
-  const featured = MOCK_POSTS.find((p) => p.featured)
-  const rest = MOCK_POSTS.filter((p) => !p.featured)
+  const { data: posts = [] } = useQuery({ queryKey: ['blog_posts'], queryFn: getBlogPosts })
+  const featured = posts.find((p) => p.featured)
+  const rest = posts.filter((p) => !p.featured)
 
   return (
     <Layout>

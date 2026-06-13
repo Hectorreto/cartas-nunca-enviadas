@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_CHAPTERS, formatChapterDate } from '@/lib/mockData'
+import { getChapters } from '@/services/chapters'
+import { formatChapterDate } from '@/lib/mockData'
 
 type Filter = 'all' | 'free' | 'premium'
 
 export default function ChaptersPage() {
   const [filter, setFilter] = useState<Filter>('all')
+  const { data: chapters = [] } = useQuery({ queryKey: ['chapters'], queryFn: getChapters })
 
-  const filtered = MOCK_CHAPTERS.filter((ch) => {
+  const filtered = chapters.filter((ch) => {
     if (filter === 'free') return ch.is_free
     if (filter === 'premium') return !ch.is_free
     return true
@@ -34,7 +37,7 @@ export default function ChaptersPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-[11px] tracking-[0.25em] text-[#d4c4a0] uppercase">Capítulos</h2>
-          <p className="text-[12px] text-[#8a7a60] mt-0.5">{MOCK_CHAPTERS.length} capítulos publicados</p>
+          <p className="text-[12px] text-[#8a7a60] mt-0.5">{chapters.length} capítulos publicados</p>
         </div>
         <div className="flex gap-1 bg-[#1a1510] border border-[#3a2e1e] rounded-sm p-1">
           {(['all', 'free', 'premium'] as Filter[]).map((f) => (

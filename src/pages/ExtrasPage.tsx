@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { Download } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_EXTRAS } from '@/lib/mockData'
+import { getExtras } from '@/services/extras'
 import type { ExtraCategory } from '@/types'
 
 const CATEGORIES: ExtraCategory[] = ['Arte conceptual', 'Wallpapers', 'Bocetos', 'Fan art']
 
 export default function ExtrasPage() {
   const [active, setActive] = useState<ExtraCategory | 'Todos'>('Todos')
+  const { data: extras = [] } = useQuery({ queryKey: ['extras'], queryFn: getExtras })
 
   const filtered = active === 'Todos'
-    ? MOCK_EXTRAS
-    : MOCK_EXTRAS.filter((e) => e.category === active)
+    ? extras
+    : extras.filter((e) => e.category === active)
 
   return (
     <Layout>

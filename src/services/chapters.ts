@@ -54,3 +54,47 @@ export async function deleteComment(commentId: string): Promise<void> {
     .eq('id', commentId)
   if (error) throw error
 }
+
+// ── Admin CRUD ────────────────────────────────────────────────────────────────
+
+export async function createChapter(data: {
+  number: number
+  title: string
+  cover_url: string
+  published_at: string
+  is_free: boolean
+}): Promise<Chapter> {
+  const { data: chapter, error } = await supabase
+    .from('chapters')
+    .insert(data)
+    .select()
+    .single()
+  if (error) throw error
+  return chapter
+}
+
+export async function updateChapter(
+  id: string,
+  data: { number?: number; title?: string; cover_url?: string; published_at?: string; is_free?: boolean }
+): Promise<void> {
+  const { error } = await supabase.from('chapters').update(data).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteChapter(id: string): Promise<void> {
+  const { error } = await supabase.from('chapters').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function replacePanels(
+  chapterId: string,
+  panels: Array<{ image_url: string; order: number; width: number; height: number }>
+): Promise<void> {
+  const { error: del } = await supabase.from('chapter_panels').delete().eq('chapter_id', chapterId)
+  if (del) throw del
+  if (!panels.length) return
+  const { error: ins } = await supabase
+    .from('chapter_panels')
+    .insert(panels.map((p) => ({ chapter_id: chapterId, ...p })))
+  if (ins) throw ins
+}

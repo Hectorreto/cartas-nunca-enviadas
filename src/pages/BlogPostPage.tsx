@@ -1,17 +1,30 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
-import { MOCK_POSTS, formatChapterDate } from '@/lib/mockData'
+import { getBlogPost, getBlogPosts } from '@/services/blog'
+import { formatChapterDate } from '@/lib/mockData'
 
 export default function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>()
-  const post = MOCK_POSTS.find((p) => p.slug === slug)
 
-  if (!post) return <Navigate to="/blog" replace />
+  const { data: post, isLoading, isError } = useQuery({
+    queryKey: ['blog_post', slug],
+    queryFn: () => getBlogPost(slug!),
+    enabled: !!slug,
+  })
 
-  const currentIndex = MOCK_POSTS.indexOf(post)
-  const prev = MOCK_POSTS[currentIndex + 1] ?? null
-  const next = MOCK_POSTS[currentIndex - 1] ?? null
+  const { data: allPosts = [] } = useQuery({
+    queryKey: ['blog_posts'],
+    queryFn: getBlogPosts,
+  })
+
+  if (isLoading) return null
+  if (isError || !post) return <Navigate to="/blog" replace />
+
+  const currentIndex = allPosts.findIndex((p) => p.slug === slug)
+  const prev = allPosts[currentIndex + 1] ?? null
+  const next = allPosts[currentIndex - 1] ?? null
 
   return (
     <Layout>
