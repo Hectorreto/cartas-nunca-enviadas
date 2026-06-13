@@ -7,6 +7,7 @@ import AuthModal from '@/components/auth/AuthModal'
 import HomePage from '@/pages/HomePage'
 import ChaptersPage from '@/pages/ChaptersPage'
 import CharactersPage from '@/pages/CharactersPage'
+import FragmentsPage from '@/pages/FragmentsPage'
 import ReaderPage from '@/pages/ReaderPage'
 
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/capitulos" element={<ChaptersPage />} />
           <Route path="/personajes" element={<CharactersPage />} />
+          <Route path="/fragmentos" element={<FragmentsPage />} />
           <Route path="/leer/:chapterId" element={<ReaderPage />} />
         </Routes>
         <AuthModal />

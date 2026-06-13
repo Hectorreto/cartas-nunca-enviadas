@@ -40,6 +40,16 @@ export interface Comment {
   }
 }
 
+export interface Fragment {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  chapter_number: number
+  chapter_title: string
+  aspect: 'tall' | 'wide' | 'square'
+}
+
 export interface ReadingProgress {
   chapter_id: string
   panel_index: number

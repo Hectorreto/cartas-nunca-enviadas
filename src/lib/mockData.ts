@@ -1,4 +1,4 @@
-import type { Chapter, Character } from '@/types'
+import type { Chapter, Character, Fragment } from '@/types'
 
 export const MOCK_CHAPTERS: Chapter[] = [
   { id: '1',  number: 1,  title: 'El hombre que no tenía nada que enseñar', cover_url: '', published_at: '2024-05-12', is_free: true },
@@ -84,4 +84,15 @@ export const MOCK_CHARACTERS: Character[] = [
     traits: ['Leal', 'Divertida', 'Directa'],
     first_appearance: 'Capítulo 2',
   },
+]
+
+export const MOCK_FRAGMENTS: Fragment[] = [
+  { id: '1', title: 'El piano',             description: 'La primera vez que ella tocó para él.',           image_url: '', chapter_number: 4,  chapter_title: 'La noche del piano',      aspect: 'tall'   },
+  { id: '2', title: 'Debajo del escritorio', description: 'Un escondite. Una conversación que no esperaban.', image_url: '', chapter_number: 3,  chapter_title: 'Debajo del escritorio',   aspect: 'wide'   },
+  { id: '3', title: 'Café en Venecia',       description: 'El silencio más ruidoso de la historia.',          image_url: '', chapter_number: 5,  chapter_title: 'Cartas desde Milán',      aspect: 'square' },
+  { id: '4', title: 'La primera carta',      description: 'Las palabras que nunca envió.',                   image_url: '', chapter_number: 1,  chapter_title: 'El hombre que no tenía nada que enseñar', aspect: 'tall' },
+  { id: '5', title: 'Tres de la mañana',     description: 'Cuando la guardia baja y la verdad sale sola.',   image_url: '', chapter_number: 9,  chapter_title: 'Tres palabras demasiado tarde', aspect: 'wide' },
+  { id: '6', title: 'La tormenta de Milán',  description: 'Atrapados. Sin excusas. Sin salida.',             image_url: '', chapter_number: 5,  chapter_title: 'Cartas desde Milán',      aspect: 'tall'   },
+  { id: '7', title: 'El espejo roto',        description: 'Lo que se ve cuando ya no hay máscaras.',          image_url: '', chapter_number: 7,  chapter_title: 'Lo que el silencio no pudo guardar', aspect: 'square' },
+  { id: '8', title: 'La última llamada',     description: 'Una decisión. Dos destinos posibles.',             image_url: '', chapter_number: 10, chapter_title: 'La última carta',         aspect: 'wide'   },
 ]
