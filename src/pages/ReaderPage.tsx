@@ -1,29 +1,34 @@
 import { useState, useCallback } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { MOCK_CHAPTERS } from '@/lib/mockData'
+import { useQuery } from '@tanstack/react-query'
+import { getChapter, getChapters, getChapterPanels } from '@/services/chapters'
 import { useReadingStore } from '@/store/readingStore'
 import ReaderHeader from '@/components/reader/ReaderHeader'
 import PanelList from '@/components/reader/PanelList'
 import ChapterNav from '@/components/reader/ChapterNav'
-import type { ChapterPanel } from '@/types'
-
-// Mock panels con alturas variadas para simular un webtoon real
-function getMockPanels(chapterId: string): ChapterPanel[] {
-  const heights = [520, 380, 640, 480, 560, 420, 700, 460, 500, 380]
-  return heights.map((h, i) => ({
-    id: `${chapterId}-panel-${i}`,
-    chapter_id: chapterId,
-    order: i,
-    image_url: '',
-    width: 800,
-    height: h,
-  }))
-}
+import CommentSection from '@/components/reader/CommentSection'
 
 export default function ReaderPage() {
   const { chapterId } = useParams<{ chapterId: string }>()
   const [progress, setProgress] = useState(0)
   const setStoreProgress = useReadingStore((s) => s.setProgress)
+
+  const { data: chapter, isLoading: chapterLoading, isError } = useQuery({
+    queryKey: ['chapter', chapterId],
+    queryFn: () => getChapter(chapterId!),
+    enabled: !!chapterId,
+  })
+
+  const { data: allChapters = [] } = useQuery({
+    queryKey: ['chapters'],
+    queryFn: getChapters,
+  })
+
+  const { data: panels = [] } = useQuery({
+    queryKey: ['panels', chapterId],
+    queryFn: () => getChapterPanels(chapterId!),
+    enabled: !!chapterId,
+  })
 
   const handleProgressChange = useCallback(
     (p: number) => {
@@ -34,15 +39,18 @@ export default function ReaderPage() {
   )
 
   if (!chapterId) return <Navigate to="/capitulos" replace />
+  if (isError) return <Navigate to="/capitulos" replace />
+  if (chapterLoading || !chapter) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
-  const chapterIndex = MOCK_CHAPTERS.findIndex((c) => c.id === chapterId)
-  const chapter = MOCK_CHAPTERS[chapterIndex]
-
-  if (!chapter) return <Navigate to="/capitulos" replace />
-
-  const prev = chapterIndex > 0 ? MOCK_CHAPTERS[chapterIndex - 1] : null
-  const next = chapterIndex < MOCK_CHAPTERS.length - 1 ? MOCK_CHAPTERS[chapterIndex + 1] : null
-  const panels = getMockPanels(chapterId)
+  const currentIndex = allChapters.findIndex((c) => c.id === chapterId)
+  const prev = currentIndex > 0 ? allChapters[currentIndex - 1] : null
+  const next = currentIndex < allChapters.length - 1 ? allChapters[currentIndex + 1] : null
 
   return (
     <div className="min-h-screen bg-black">
@@ -52,11 +60,10 @@ export default function ReaderPage() {
         nextId={next?.id ?? null}
         progress={progress}
       />
-
-      {/* Panels — pt-14 para no quedar bajo el header */}
       <div className="pt-14">
         <PanelList panels={panels} onProgressChange={handleProgressChange} />
         <ChapterNav prev={prev} next={next} />
+        <CommentSection chapterId={chapterId} />
       </div>
     </div>
   )
