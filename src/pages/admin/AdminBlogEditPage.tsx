@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2, Plus, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlogPostById, createBlogPost, updateBlogPost } from '@/services/blog'
-import { uploadFile } from '@/lib/storage'
+import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 
 const inputClass =
@@ -24,7 +24,6 @@ export default function AdminBlogEditPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isNew = !id
-  const newTagRef = useRef<HTMLInputElement>(null)
 
   const { data: post } = useQuery({
     queryKey: ['blog_post_id', id],
@@ -77,8 +76,10 @@ export default function AdminBlogEditPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog_posts'] })
+      toast.success(isNew ? 'Entrada creada' : 'Entrada actualizada')
       navigate('/admin/blog')
     },
+    onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
 
   return (
@@ -170,10 +171,6 @@ export default function AdminBlogEditPage() {
             <Plus size={12} /> Agregar párrafo
           </button>
         </div>
-
-        {saveMutation.isError && (
-          <p className="text-[12px] text-red-400">Error al guardar. Inténtalo de nuevo.</p>
-        )}
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !title || !slug}

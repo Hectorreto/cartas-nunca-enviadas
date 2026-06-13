@@ -1,8 +1,9 @@
-import { Search, LogOut, User } from 'lucide-react'
+import { Search, LogOut, User, Shield } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useUiStore } from '@/store/uiStore'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 const navLinks = [
   { to: '/', label: 'INICIO' },
@@ -16,6 +17,7 @@ const navLinks = [
 export default function Navbar() {
   const user = useAuthStore((s) => s.user)
   const openAuthModal = useUiStore((s) => s.openAuthModal)
+  const isAdmin = useIsAdmin()
 
   return (
     <header className="sticky top-0 z-50 bg-[#0d0b08]/95 backdrop-blur border-b border-[#3a2e1e]">
@@ -61,6 +63,11 @@ export default function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link to="/admin" className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Panel de administración">
+                  <Shield size={14} />
+                </Link>
+              )}
               <div className="flex items-center gap-2 text-[#c9a96e]">
                 <User size={14} />
                 <span className="text-[11px] tracking-wider hidden sm:block">

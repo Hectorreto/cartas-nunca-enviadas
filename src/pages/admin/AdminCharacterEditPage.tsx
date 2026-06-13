@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getCharacter, createCharacter, updateCharacter } from '@/services/characters'
-import { uploadFile } from '@/lib/storage'
+import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 
 const inputClass =
@@ -57,8 +57,10 @@ export default function AdminCharacterEditPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['characters'] })
+      toast.success(isNew ? 'Personaje creado' : 'Personaje actualizado')
       navigate('/admin/personajes')
     },
+    onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
 
   return (
@@ -145,10 +147,6 @@ export default function AdminCharacterEditPage() {
         {/* Retrato */}
         <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? `new-${Date.now()}`}/portrait.jpg`}
           label="Retrato del personaje" onChange={setPortraitUrl} />
-
-        {saveMutation.isError && (
-          <p className="text-[12px] text-red-400">Error al guardar. Inténtalo de nuevo.</p>
-        )}
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !name || !label}

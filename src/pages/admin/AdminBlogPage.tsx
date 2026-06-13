@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Loader2, Star } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlogPosts, deleteBlogPost } from '@/services/blog'
 import { formatChapterDate } from '@/lib/mockData'
+import { toast } from '@/lib/toast'
 import AdminBlogEditPage from './AdminBlogEditPage'
 
 function BlogList() {
@@ -12,7 +13,8 @@ function BlogList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteBlogPost,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blog_posts'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada') },
+    onError: () => toast.error('Error al eliminar la entrada'),
   })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>

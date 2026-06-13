@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getExtra, createExtra, updateExtra } from '@/services/extras'
+import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 import type { ExtraCategory } from '@/types'
 
@@ -35,7 +36,7 @@ export default function AdminExtraEditPage() {
     setCategory(extra.category as ExtraCategory)
     setImageUrl(extra.image_url)
     setDownloadUrl(extra.download_url ?? '')
-    setDescription(extra.description)
+    setDescription(extra.description ?? '')
   }, [extra])
 
   const saveMutation = useMutation({
@@ -44,7 +45,7 @@ export default function AdminExtraEditPage() {
         title,
         category,
         image_url: imageUrl,
-        download_url: downloadUrl || null,
+        download_url: downloadUrl || undefined,
         description,
       }
       if (isNew) await createExtra(data)
@@ -52,8 +53,10 @@ export default function AdminExtraEditPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['extras'] })
+      toast.success(isNew ? 'Extra creado' : 'Extra actualizado')
       navigate('/admin/extras')
     },
+    onError: () => toast.error('Error al guardar. Inténtalo de nuevo.'),
   })
 
   return (
@@ -110,10 +113,6 @@ export default function AdminExtraEditPage() {
         {/* Imagen */}
         <ImageUpload value={imageUrl} storagePath={`extras/${id ?? `new-${Date.now()}`}/image.jpg`}
           label="Imagen" onChange={setImageUrl} />
-
-        {saveMutation.isError && (
-          <p className="text-[12px] text-red-400">Error al guardar. Inténtalo de nuevo.</p>
-        )}
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !title}

@@ -14,6 +14,7 @@ import BlogPostPage from '@/pages/BlogPostPage'
 import ExtrasPage from '@/pages/ExtrasPage'
 import ReaderPage from '@/pages/ReaderPage'
 import AdminPage from '@/pages/admin/AdminPage'
+import Toaster from '@/components/ui/Toaster'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="/admin/*" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
         </Routes>
         <AuthModal />
+        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   )

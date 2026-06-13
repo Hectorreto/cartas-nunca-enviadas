@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getChapters, deleteChapter } from '@/services/chapters'
 import { formatChapterDate } from '@/lib/mockData'
+import { toast } from '@/lib/toast'
 import AdminChapterEditPage from './AdminChapterEditPage'
 
 function ChapterList() {
@@ -15,7 +16,8 @@ function ChapterList() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteChapter,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chapters'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado') },
+    onError: () => toast.error('Error al eliminar el capítulo'),
   })
 
   if (isLoading) {

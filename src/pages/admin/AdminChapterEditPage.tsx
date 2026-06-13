@@ -10,6 +10,7 @@ import {
   replacePanels,
 } from '@/services/chapters'
 import { uploadFile } from '@/lib/storage'
+import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 import PanelUploader, { type PanelSlot } from '@/components/admin/PanelUploader'
 
@@ -105,8 +106,10 @@ export default function AdminChapterEditPage() {
         queryClient.invalidateQueries({ queryKey: ['chapter', id] })
         queryClient.invalidateQueries({ queryKey: ['panels', id] })
       }
+      toast.success(isNew ? 'Capítulo creado' : 'Capítulo actualizado')
       navigate('/admin/capitulos')
     },
+    onError: () => toast.error('Error al guardar. Verifica los datos e inténtalo de nuevo.'),
   })
 
   return (
@@ -195,12 +198,6 @@ export default function AdminChapterEditPage() {
         <div className="border-t border-[#3a2e1e] pt-6">
           <PanelUploader panels={panels} onChange={setPanels} />
         </div>
-
-        {saveMutation.isError && (
-          <p className="text-[12px] text-red-400">
-            Error al guardar. Verifica los datos e inténtalo de nuevo.
-          </p>
-        )}
 
         <div className="flex gap-3 pt-2">
           <button
