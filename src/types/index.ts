@@ -50,6 +50,18 @@ export interface Fragment {
   aspect: 'tall' | 'wide' | 'square'
 }
 
+export interface BlogPost {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string[]
+  cover_url: string
+  published_at: string
+  tag: string
+  featured: boolean
+}
+
 export interface ReadingProgress {
   chapter_id: string
   panel_index: number

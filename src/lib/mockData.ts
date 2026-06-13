@@ -1,4 +1,4 @@
-import type { Chapter, Character, Fragment } from '@/types'
+import type { Chapter, Character, Fragment, BlogPost } from '@/types'
 
 export const MOCK_CHAPTERS: Chapter[] = [
   { id: '1',  number: 1,  title: 'El hombre que no tenía nada que enseñar', cover_url: '', published_at: '2024-05-12', is_free: true },
@@ -95,4 +95,69 @@ export const MOCK_FRAGMENTS: Fragment[] = [
   { id: '6', title: 'La tormenta de Milán',  description: 'Atrapados. Sin excusas. Sin salida.',             image_url: '', chapter_number: 5,  chapter_title: 'Cartas desde Milán',      aspect: 'tall'   },
   { id: '7', title: 'El espejo roto',        description: 'Lo que se ve cuando ya no hay máscaras.',          image_url: '', chapter_number: 7,  chapter_title: 'Lo que el silencio no pudo guardar', aspect: 'square' },
   { id: '8', title: 'La última llamada',     description: 'Una decisión. Dos destinos posibles.',             image_url: '', chapter_number: 10, chapter_title: 'La última carta',         aspect: 'wide'   },
+]
+
+export const MOCK_POSTS: BlogPost[] = [
+  {
+    id: '1',
+    slug: 'bienvenidos',
+    title: 'Bienvenidos a Cartas que nunca fueron enviadas',
+    excerpt: 'Una historia sobre lo que pasa cuando dos personas que no creen en el amor se encuentran en el momento equivocado.',
+    content: [
+      'Hola a todos. Hoy es un día raro. De esos en los que terminas publicando algo que llevas meses guardando en carpetas con nombres vergonzosos como "proyecto_final_v3_ESTE_SI".',
+      'Cartas que nunca fueron enviadas nació de una pregunta sencilla: ¿qué pasa cuando dos personas que aprendieron a no necesitar a nadie se necesitan la una a la otra? No de forma poética. De forma incómoda, torpe y un poco ridícula.',
+      'Nikolai y Valentina no son héroes. Son personas con heridas viejas que no han terminado de sanar y que, por alguna razón que ninguno de los dos entiende bien, terminan en la vida del otro.',
+      'Espero que les guste. Yo ya los quiero demasiado como para ser objetiva.',
+    ],
+    cover_url: '',
+    published_at: '2024-05-12',
+    tag: 'Anuncio',
+    featured: true,
+  },
+  {
+    id: '2',
+    slug: 'detras-del-capitulo-3',
+    title: 'Detrás del capítulo 3: Debajo del escritorio',
+    excerpt: 'El capítulo que más me costó dibujar y el que más me gusta de los que he publicado hasta ahora.',
+    content: [
+      'El capítulo 3 fue el más difícil de dibujar hasta ahora. No por la complejidad técnica, sino porque tenía que transmitir algo muy específico: la incomodidad de estar demasiado cerca de alguien que te pone nerviosa sin saber por qué.',
+      'La escena debajo del escritorio la reescribí cuatro veces. En la primera versión era demasiado obvia. En la segunda, demasiado fría. La tercera ni la guardo. La cuarta fue la que quedó.',
+      'Lo que más me gustó del resultado fue que varias personas me dijeron que se les hizo un nudo en el estómago leyéndolo. Eso era exactamente lo que quería.',
+    ],
+    cover_url: '',
+    published_at: '2024-05-28',
+    tag: 'Detrás de cámaras',
+    featured: false,
+  },
+  {
+    id: '3',
+    slug: 'calendario-junio',
+    title: 'Calendario de publicaciones — Junio',
+    excerpt: 'Confirmado: los capítulos de junio salen los domingos. Aquí las fechas exactas.',
+    content: [
+      'Rápida actualización para que no se pierdan nada. Durante junio voy a publicar un capítulo por semana, los domingos.',
+      'Capítulo 4 — 2 de junio. Capítulo 5 — 9 de junio. Capítulo 6 — 16 de junio. Capítulo 7 — 23 de junio.',
+      'Si alguna semana me retraso, lo aviso antes. Gracias por la paciencia y por todos los mensajes. Los leo todos aunque no siempre puedo responder.',
+    ],
+    cover_url: '',
+    published_at: '2024-05-31',
+    tag: 'Actualización',
+    featured: false,
+  },
+  {
+    id: '4',
+    slug: 'inspiraciones-musicales',
+    title: 'La música que me inspiró mientras dibujaba',
+    excerpt: 'La playlist que sonó en bucle durante los primeros seis capítulos. Con notas sobre qué escena acompañó cada canción.',
+    content: [
+      'Siempre dibujo con música. No puedo trabajar en silencio, me distrae el silencio más que el ruido.',
+      'Para esta historia armé una playlist desde el principio, antes incluso de tener claro el guion completo. La música me ayuda a encontrar el tono de una escena antes de saber exactamente qué va a pasar en ella.',
+      'Hay canciones de piano clásico para las escenas de Nikolai en su apartamento. Canciones en italiano para las escenas de Milán. Y mucho indie melancólico para todo lo demás.',
+      'La playlist oficial ya está disponible en Spotify. La encuentran en la home.',
+    ],
+    cover_url: '',
+    published_at: '2024-06-10',
+    tag: 'Proceso',
+    featured: false,
+  },
 ]
