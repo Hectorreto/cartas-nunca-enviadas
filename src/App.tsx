@@ -22,15 +22,9 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
-  const { setSession, setProfile } = useAuthStore()
+  const { setSession, setProfile, setAuthReady } = useAuthStore()
 
   useEffect(() => {
-    async function initAuth() {
-      const { data } = await supabase.auth.getSession()
-      setSession(data.session)
-      if (data.session?.user) await fetchProfile(data.session.user.id)
-    }
-
     async function fetchProfile(userId: string) {
       const { data } = await supabase
         .from('profiles')
@@ -38,6 +32,13 @@ export default function App() {
         .eq('id', userId)
         .single()
       if (data) setProfile({ role: data.role ?? 'reader', username: data.username, avatar_url: data.avatar_url })
+    }
+
+    async function initAuth() {
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
+      if (data.session?.user) await fetchProfile(data.session.user.id)
+      setAuthReady()
     }
 
     initAuth()
@@ -52,7 +53,7 @@ export default function App() {
     })
 
     return () => listener.subscription.unsubscribe()
-  }, [setSession, setProfile])
+  }, [setSession, setProfile, setAuthReady])
 
   return (
     <QueryClientProvider client={queryClient}>
