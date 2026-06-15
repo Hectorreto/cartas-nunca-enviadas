@@ -28,11 +28,13 @@ export default function CharactersSection() {
             key={ch.id}
             className="bg-[#1a1510] border border-[#3a2e1e] rounded-sm p-4"
           >
-            {ch.portrait_url ? (
-              <img src={ch.portrait_url} alt={ch.name} className="w-full aspect-[3/4] object-cover rounded-sm border border-[#3a2e1e] mb-3" />
-            ) : (
-              <div className="w-full aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] mb-3" />
-            )}
+            <Link to="/personajes" className="block group/portrait">
+              {ch.portrait_url ? (
+                <img src={ch.portrait_url} alt={ch.name} className="w-full aspect-[3/4] object-cover rounded-sm border border-[#3a2e1e] mb-3 transition-all group-hover/portrait:border-[#c9a96e]/50 group-hover/portrait:brightness-110" />
+              ) : (
+                <div className="w-full aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] mb-3 transition-all group-hover/portrait:border-[#c9a96e]/50" />
+              )}
+            </Link>
             <p className="text-[11px] tracking-[0.2em] text-[#c9a96e] font-medium mb-1">
               {ch.label}
             </p>
