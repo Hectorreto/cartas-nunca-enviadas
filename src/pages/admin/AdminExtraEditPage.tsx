@@ -60,7 +60,7 @@ function ExtraForm({ id, extra }: { id?: string; extra?: Extra }) {
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteExtra(id!),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado'); navigate('/admin/extras') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado'); await navigate('/admin/extras') },
     onError: () => toast.error('Error al eliminar el extra'),
   })
 

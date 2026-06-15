@@ -134,7 +134,7 @@ function ChapterForm({
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteChapter(id!),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado'); navigate('/admin/capitulos') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado'); await navigate('/admin/capitulos') },
     onError: () => toast.error('Error al eliminar el capítulo'),
   })
 

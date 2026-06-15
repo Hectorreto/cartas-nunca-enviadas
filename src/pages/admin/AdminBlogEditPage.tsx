@@ -80,7 +80,7 @@ function BlogForm({ id, post }: { id?: string; post?: BlogPost }) {
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteBlogPost(id!),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada'); navigate('/admin/blog') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada'); await navigate('/admin/blog') },
     onError: () => toast.error('Error al eliminar la entrada'),
   })
 

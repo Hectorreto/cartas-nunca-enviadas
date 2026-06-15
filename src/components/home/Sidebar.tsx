@@ -9,6 +9,7 @@ import { formatRelativeTime } from '@/lib/utils'
 export default function Sidebar() {
   const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
   const preview = useMemo(() =>
+    // eslint-disable-next-line react-hooks/purity
     [...fragments].sort(() => Math.random() - 0.5).slice(0, 3)
   , [fragments])
   const { data: comments = [] } = useQuery({ queryKey: ['comments_recent'], queryFn: () => getRecentComments(3) })

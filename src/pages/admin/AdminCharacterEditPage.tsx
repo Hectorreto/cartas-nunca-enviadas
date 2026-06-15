@@ -62,7 +62,7 @@ function CharacterForm({ id, character }: { id?: string; character?: Character }
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteCharacter(id!),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado'); navigate('/admin/personajes') },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado'); await navigate('/admin/personajes') },
     onError: () => toast.error('Error al eliminar el personaje'),
   })
 
