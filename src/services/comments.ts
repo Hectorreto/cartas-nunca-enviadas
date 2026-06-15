@@ -14,5 +14,10 @@ export async function getRecentComments(limit = 3): Promise<RecentComment[]> {
     .order('created_at', { ascending: false })
     .limit(limit)
   if (error) throw error
-  return data as RecentComment[]
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    content: row.content as string,
+    created_at: row.created_at as string,
+    user: (Array.isArray(row.user) ? row.user[0] : row.user) as { username: string },
+  }))
 }
