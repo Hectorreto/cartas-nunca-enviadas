@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -5,6 +6,7 @@ import { getChapters, deleteChapter } from '@/services/chapters'
 import { formatChapterDate } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import AdminChapterEditPage from './AdminChapterEditPage'
+import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function ChapterList() {
   const navigate = useNavigate()
@@ -13,6 +15,7 @@ function ChapterList() {
     queryKey: ['chapters'],
     queryFn: getChapters,
   })
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
 
   const deleteMutation = useMutation({
     mutationFn: deleteChapter,
@@ -93,11 +96,7 @@ function ChapterList() {
                         <Pencil size={13} />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${ch.title}"? Esta acción no se puede deshacer.`)) {
-                            deleteMutation.mutate(ch.id)
-                          }
-                        }}
+                        onClick={() => setPendingDelete({ id: ch.id, name: ch.title })}
                         disabled={deleteMutation.isPending}
                         className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors"
                         title="Eliminar"
@@ -112,6 +111,14 @@ function ChapterList() {
           </table>
         </div>
       )}
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title={`¿Eliminar "${pendingDelete?.name}"?`}
+        description="Esta acción no se puede deshacer."
+        loading={deleteMutation.isPending}
+        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2, Star } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -5,11 +6,13 @@ import { getBlogPosts, deleteBlogPost } from '@/services/blog'
 import { formatChapterDate } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import AdminBlogEditPage from './AdminBlogEditPage'
+import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function BlogList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: posts = [], isLoading } = useQuery({ queryKey: ['blog_posts'], queryFn: getBlogPosts })
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
 
   const deleteMutation = useMutation({
     mutationFn: deleteBlogPost,
@@ -65,7 +68,7 @@ function BlogList() {
                       <button onClick={() => navigate(p.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
                       </button>
-                      <button onClick={() => { if (confirm(`¿Eliminar "${p.title}"?`)) deleteMutation.mutate(p.id) }}
+                      <button onClick={() => setPendingDelete({ id: p.id, name: p.title })}
                         disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
                         <Trash2 size={13} />
                       </button>
@@ -77,6 +80,14 @@ function BlogList() {
           </table>
         </div>
       )}
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title={`¿Eliminar "${pendingDelete?.name}"?`}
+        description="Esta acción no se puede deshacer."
+        loading={deleteMutation.isPending}
+        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   )
 }

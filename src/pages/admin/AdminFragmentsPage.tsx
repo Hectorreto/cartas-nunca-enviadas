@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFragments, deleteFragment } from '@/services/fragments'
 import { toast } from '@/lib/toast'
 import AdminFragmentEditPage from './AdminFragmentEditPage'
+import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function FragmentList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: fragments = [], isLoading } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
 
   const deleteMutation = useMutation({
     mutationFn: deleteFragment,
@@ -59,7 +62,7 @@ function FragmentList() {
                       <button onClick={() => navigate(f.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
                       </button>
-                      <button onClick={() => { if (confirm(`¿Eliminar "${f.title}"?`)) deleteMutation.mutate(f.id) }}
+                      <button onClick={() => setPendingDelete({ id: f.id, name: f.title })}
                         disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
                         <Trash2 size={13} />
                       </button>
@@ -71,6 +74,14 @@ function FragmentList() {
           </table>
         </div>
       )}
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title={`¿Eliminar "${pendingDelete?.name}"?`}
+        description="Esta acción no se puede deshacer."
+        loading={deleteMutation.isPending}
+        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   )
 }
