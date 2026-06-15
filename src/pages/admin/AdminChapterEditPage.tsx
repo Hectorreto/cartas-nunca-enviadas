@@ -122,7 +122,14 @@ function ChapterForm({
       toast.success(isNew ? 'Capítulo creado' : 'Capítulo actualizado')
       await navigate('/admin/capitulos')
     },
-    onError: () => toast.error('Error al guardar. Verifica los datos e inténtalo de nuevo.'),
+    onError: (error: unknown) => {
+      const pgError = error as { code?: string }
+      if (pgError?.code === '23505') {
+        toast.error(`Ya existe un capítulo con el número ${number}. Usa un número diferente.`)
+      } else {
+        toast.error('Error al guardar. Verifica los datos e inténtalo de nuevo.')
+      }
+    },
   })
 
   const deleteMutation = useMutation({
