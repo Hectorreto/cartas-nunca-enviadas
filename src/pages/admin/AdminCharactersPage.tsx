@@ -1,23 +1,12 @@
-import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getCharacters, deleteCharacter } from '@/services/characters'
-import { toast } from '@/lib/toast'
+import { Plus, Pencil, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getCharacters } from '@/services/characters'
 import AdminCharacterEditPage from './AdminCharacterEditPage'
-import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function CharacterList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: characters = [], isLoading } = useQuery({ queryKey: ['characters'], queryFn: getCharacters })
-  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteCharacter,
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['characters'] }); toast.success('Personaje eliminado') },
-    onError: () => toast.error('Error al eliminar el personaje'),
-  })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>
 
@@ -46,7 +35,7 @@ function CharacterList() {
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal">Nombre</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Etiqueta</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Rol</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
             <tbody>
@@ -60,13 +49,9 @@ function CharacterList() {
                     }`}>{c.role === 'main' ? 'Principal' : 'Secundario'}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end">
                       <button onClick={() => navigate(c.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
-                      </button>
-                      <button onClick={() => setPendingDelete({ id: c.id, name: c.name })}
-                        disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
@@ -76,14 +61,6 @@ function CharacterList() {
           </table>
         </div>
       )}
-      <ConfirmDialog
-        open={!!pendingDelete}
-        title={`¿Eliminar "${pendingDelete?.name}"?`}
-        description="Esta acción no se puede deshacer."
-        loading={deleteMutation.isPending}
-        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
-        onCancel={() => setPendingDelete(null)}
-      />
     </div>
   )
 }

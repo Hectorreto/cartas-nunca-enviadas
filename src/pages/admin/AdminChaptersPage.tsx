@@ -1,26 +1,15 @@
-import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getChapters, deleteChapter } from '@/services/chapters'
+import { Plus, Pencil, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getChapters } from '@/services/chapters'
 import { formatChapterDate } from '@/lib/utils'
-import { toast } from '@/lib/toast'
 import AdminChapterEditPage from './AdminChapterEditPage'
-import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function ChapterList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: chapters = [], isLoading } = useQuery({
     queryKey: ['chapters'],
     queryFn: getChapters,
-  })
-  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteChapter,
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado') },
-    onError: () => toast.error('Error al eliminar el capítulo'),
   })
 
   if (isLoading) {
@@ -62,7 +51,7 @@ function ChapterList() {
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal">Título</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Fecha</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Tipo</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
             <tbody>
@@ -87,21 +76,13 @@ function ChapterList() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end">
                       <button
                         onClick={() => navigate(ch.id)}
                         className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors"
                         title="Editar"
                       >
                         <Pencil size={13} />
-                      </button>
-                      <button
-                        onClick={() => setPendingDelete({ id: ch.id, name: ch.title })}
-                        disabled={deleteMutation.isPending}
-                        className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
@@ -111,14 +92,6 @@ function ChapterList() {
           </table>
         </div>
       )}
-      <ConfirmDialog
-        open={!!pendingDelete}
-        title={`¿Eliminar "${pendingDelete?.name}"?`}
-        description="Esta acción no se puede deshacer."
-        loading={deleteMutation.isPending}
-        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
-        onCancel={() => setPendingDelete(null)}
-      />
     </div>
   )
 }

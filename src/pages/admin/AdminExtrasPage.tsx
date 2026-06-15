@@ -1,23 +1,12 @@
-import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getExtras, deleteExtra } from '@/services/extras'
-import { toast } from '@/lib/toast'
+import { Plus, Pencil, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getExtras } from '@/services/extras'
 import AdminExtraEditPage from './AdminExtraEditPage'
-import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 function ExtraList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: extras = [], isLoading } = useQuery({ queryKey: ['extras'], queryFn: getExtras })
-  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteExtra,
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['extras'] }); toast.success('Extra eliminado') },
-    onError: () => toast.error('Error al eliminar el extra'),
-  })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>
 
@@ -45,7 +34,7 @@ function ExtraList() {
               <tr className="border-b border-[#3a2e1e] bg-[#1a1510]">
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal">Título</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Categoría</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
             <tbody>
@@ -56,13 +45,9 @@ function ExtraList() {
                     <span className="text-[9px] tracking-widest uppercase text-[#6a5a40] border border-[#6a5a40]/30 px-2 py-0.5">{e.category}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end">
                       <button onClick={() => navigate(e.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
-                      </button>
-                      <button onClick={() => setPendingDelete({ id: e.id, name: e.title })}
-                        disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
@@ -72,14 +57,6 @@ function ExtraList() {
           </table>
         </div>
       )}
-      <ConfirmDialog
-        open={!!pendingDelete}
-        title={`¿Eliminar "${pendingDelete?.name}"?`}
-        description="Esta acción no se puede deshacer."
-        loading={deleteMutation.isPending}
-        onConfirm={() => { deleteMutation.mutate(pendingDelete!.id); setPendingDelete(null) }}
-        onCancel={() => setPendingDelete(null)}
-      />
     </div>
   )
 }

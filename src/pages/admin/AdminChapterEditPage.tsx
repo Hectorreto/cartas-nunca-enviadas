@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getChapter,
@@ -8,11 +8,13 @@ import {
   createChapter,
   updateChapter,
   replacePanels,
+  deleteChapter,
 } from '@/services/chapters'
 import { uploadFile } from '@/lib/storage'
 import { toast } from '@/lib/toast'
 import ImageUpload from '@/components/admin/ImageUpload'
 import PanelUploader, { type PanelSlot } from '@/components/admin/PanelUploader'
+import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import type { Chapter, ChapterPanel } from '@/types'
 
 const inputClass =
@@ -56,6 +58,7 @@ function ChapterForm({
   const queryClient = useQueryClient()
   const isNew = !id
   const [newId] = useState(() => `new-${Date.now()}`)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [number, setNumber] = useState(chapter ? String(chapter.number) : '')
   const [title, setTitle] = useState(chapter?.title ?? '')
@@ -120,6 +123,12 @@ function ChapterForm({
       await navigate('/admin/capitulos')
     },
     onError: () => toast.error('Error al guardar. Verifica los datos e inténtalo de nuevo.'),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteChapter(id!),
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['chapters'] }); toast.success('Capítulo eliminado'); navigate('/admin/capitulos') },
+    onError: () => toast.error('Error al eliminar el capítulo'),
   })
 
   return (
@@ -210,7 +219,7 @@ function ChapterForm({
           <PanelUploader panels={panels} onChange={setPanels} />
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex items-center gap-3 pt-2">
           <button
             type="submit"
             disabled={saveMutation.isPending || !title || !number}
@@ -225,7 +234,25 @@ function ChapterForm({
           >
             Cancelar
           </Link>
+          {!isNew && (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="ml-auto flex items-center gap-2 px-4 py-2.5 text-[11px] tracking-widest uppercase text-red-400/70 hover:text-red-400 transition-colors"
+            >
+              <Trash2 size={13} />
+              Eliminar
+            </button>
+          )}
         </div>
+        <ConfirmDialog
+          open={confirmDelete}
+          title={`¿Eliminar "${title}"?`}
+          description="Esta acción eliminará el capítulo y todos sus paneles. No se puede deshacer."
+          loading={deleteMutation.isPending}
+          onConfirm={() => { setConfirmDelete(false); deleteMutation.mutate() }}
+          onCancel={() => setConfirmDelete(false)}
+        />
       </form>
     </div>
   )
