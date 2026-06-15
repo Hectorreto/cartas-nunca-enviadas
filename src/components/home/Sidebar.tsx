@@ -3,18 +3,15 @@ import { ChevronRight, Music } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getFragments } from '@/services/fragments'
-
-const comments = [
-  { user: 'LectoraNocturna', time: 'hace 2 horas', text: 'NORUEGO IDIOTA DILE QUE LA AMAS. 🤬' },
-  { user: 'OceanoDeLagrimas', time: 'hace 5 horas', text: 'Llevo 42 capítulos esperando esta confesión.' },
-  { user: 'CafeYTragedia', time: 'hace 8 horas', text: 'Si no le dices nada te voy a atropellar yo.' },
-]
+import { getRecentComments } from '@/services/comments'
+import { formatRelativeTime } from '@/lib/utils'
 
 export default function Sidebar() {
   const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
   const preview = useMemo(() =>
     [...fragments].sort(() => Math.random() - 0.5).slice(0, 3)
   , [fragments])
+  const { data: comments = [] } = useQuery({ queryKey: ['comments_recent'], queryFn: () => getRecentComments(3) })
 
   return (
     <aside className="flex flex-col gap-8">
@@ -97,14 +94,14 @@ export default function Sidebar() {
         </div>
         <div className="space-y-3">
           {comments.map((c) => (
-            <div key={c.user} className="flex items-start gap-2">
+            <div key={c.id} className="flex items-start gap-2">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#3a2e1e] to-[#2a1f10] flex-shrink-0 border border-[#3a2e1e]" />
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[11px] font-medium text-[#c9a96e]">{c.user}</span>
-                  <span className="text-[10px] text-[#6a5a40]">{c.time}</span>
+                  <span className="text-[11px] font-medium text-[#c9a96e]">{c.user.username}</span>
+                  <span className="text-[10px] text-[#6a5a40]">{formatRelativeTime(c.created_at)}</span>
                 </div>
-                <p className="text-[12px] text-[#8a7a60] mt-0.5">{c.text}</p>
+                <p className="text-[12px] text-[#8a7a60] mt-0.5">{c.content}</p>
               </div>
             </div>
           ))}
