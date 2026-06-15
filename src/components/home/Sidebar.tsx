@@ -106,9 +106,9 @@ export default function Sidebar() {
             </div>
           ))}
         </div>
-        <button className="w-full mt-4 py-2 border border-[#3a2e1e] text-[10px] tracking-widest text-[#8a7a60] hover:border-[#c9a96e] hover:text-[#c9a96e] uppercase transition-all">
+        <Link to="/capitulos" className="block w-full mt-4 py-2 border border-[#3a2e1e] text-[10px] tracking-widest text-[#8a7a60] hover:border-[#c9a96e] hover:text-[#c9a96e] uppercase transition-all text-center">
           Dejar mi comentario
-        </button>
+        </Link>
       </div>
     </aside>
   )
