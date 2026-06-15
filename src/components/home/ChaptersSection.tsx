@@ -1,10 +1,13 @@
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { MOCK_CHAPTERS, formatChapterDate } from '@/lib/mockData'
-
-const preview = MOCK_CHAPTERS.slice(0, 6)
+import { useQuery } from '@tanstack/react-query'
+import { getChapters } from '@/services/chapters'
+import { formatChapterDate } from '@/lib/mockData'
 
 export default function ChaptersSection() {
+  const { data: chapters = [] } = useQuery({ queryKey: ['chapters'], queryFn: getChapters })
+  const preview = chapters.slice(0, 6)
+
   return (
     <section className="mt-8">
       <div className="flex items-center justify-between mb-4">
