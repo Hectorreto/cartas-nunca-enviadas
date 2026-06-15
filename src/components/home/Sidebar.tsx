@@ -1,11 +1,8 @@
+import { useMemo } from 'react'
 import { ChevronRight, Music } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
-const fragments = [
-  { id: '1', label: 'El piano' },
-  { id: '2', label: 'Debajo del escritorio' },
-  { id: '3', label: 'Café en Venecia' },
-]
+import { useQuery } from '@tanstack/react-query'
+import { getFragments } from '@/services/fragments'
 
 const comments = [
   { user: 'LectoraNocturna', time: 'hace 2 horas', text: 'NORUEGO IDIOTA DILE QUE LA AMAS. 🤬' },
@@ -14,6 +11,11 @@ const comments = [
 ]
 
 export default function Sidebar() {
+  const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
+  const preview = useMemo(() =>
+    [...fragments].sort(() => Math.random() - 0.5).slice(0, 3)
+  , [fragments])
+
   return (
     <aside className="flex flex-col gap-8">
       {/* Sobre la historia */}
@@ -44,11 +46,15 @@ export default function Sidebar() {
           </Link>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {fragments.map((f) => (
-            <div key={f.id} className="group cursor-pointer">
-              <div className="aspect-square bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
-              <p className="mt-1 text-[10px] text-[#8a7a60] text-center leading-tight">{f.label}</p>
-            </div>
+          {preview.map((f) => (
+            <Link key={f.id} to="/fragmentos" className="group">
+              {f.image_url ? (
+                <img src={f.image_url} alt={f.title} className="aspect-square w-full object-cover rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
+              ) : (
+                <div className="aspect-square bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
+              )}
+              <p className="mt-1 text-[10px] text-[#8a7a60] text-center leading-tight">{f.title}</p>
+            </Link>
           ))}
         </div>
       </div>
