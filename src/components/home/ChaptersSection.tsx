@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getChapters } from '@/services/chapters'
 import { formatChapterDate } from '@/lib/utils'
 
-const SCROLL_AMOUNT = 3 * (145 + 12)
+const SCROLL_AMOUNT = 145 + 12
 
 export default function ChaptersSection() {
   const { data: chapters = [] } = useQuery({ queryKey: ['chapters'], queryFn: getChapters })
