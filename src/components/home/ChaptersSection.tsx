@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getChapters } from '@/services/chapters'
-import { formatChapterDate } from '@/lib/mockData'
+import { formatChapterDate } from '@/lib/utils'
 
 export default function ChaptersSection() {
   const { data: chapters = [] } = useQuery({ queryKey: ['chapters'], queryFn: getChapters })

@@ -2,7 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getChapters, deleteChapter } from '@/services/chapters'
-import { formatChapterDate } from '@/lib/mockData'
+import { formatChapterDate } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import AdminChapterEditPage from './AdminChapterEditPage'
 

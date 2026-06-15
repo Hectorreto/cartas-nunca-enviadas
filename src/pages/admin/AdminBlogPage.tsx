@@ -2,7 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Loader2, Star } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlogPosts, deleteBlogPost } from '@/services/blog'
-import { formatChapterDate } from '@/lib/mockData'
+import { formatChapterDate } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import AdminBlogEditPage from './AdminBlogEditPage'
 

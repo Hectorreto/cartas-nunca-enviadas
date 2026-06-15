@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
 import { getBlogPosts } from '@/services/blog'
-import { formatChapterDate } from '@/lib/mockData'
+import { formatChapterDate } from '@/lib/utils'
 
 export default function BlogPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['blog_posts'], queryFn: getBlogPosts })
