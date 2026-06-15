@@ -9,6 +9,7 @@ npm run dev       # Start dev server (localhost:5173)
 npm run build     # Type-check + production build
 npm run lint      # ESLint
 npm run preview   # Preview production build locally
+npm run schema:pull   # Sync supabase/schema.sql with the real remote schema
 npx tsc --noEmit  # Type-check only (run before committing)
 ```
 
@@ -48,7 +49,7 @@ All color tokens are CSS custom properties defined in `src/index.css` under `@th
 
 ### Supabase
 - Client: `src/lib/supabase.ts` — reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from env
-- Schema history: `supabase/schema.sql` — append migrations as comments when running them in the dashboard
+- Schema: `supabase/schema.sql` — always reflects the real remote schema. After any change in the Supabase dashboard, run `npm run schema:pull` to regenerate this file and commit it.
 - Storage bucket: `comic` (public) — intended path convention `panels/{chapter_id}/{order}.jpg`
 - RLS is enabled on all tables. Premium chapters require auth; admin write policies check `profiles.role = 'admin'`
 

@@ -1,19 +1,19 @@
+import { useMemo } from 'react'
 import { ChevronRight, Music } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
-const fragments = [
-  { id: '1', label: 'El piano' },
-  { id: '2', label: 'Debajo del escritorio' },
-  { id: '3', label: 'Café en Venecia' },
-]
-
-const comments = [
-  { user: 'LectoraNocturna', time: 'hace 2 horas', text: 'NORUEGO IDIOTA DILE QUE LA AMAS. 🤬' },
-  { user: 'OceanoDeLagrimas', time: 'hace 5 horas', text: 'Llevo 42 capítulos esperando esta confesión.' },
-  { user: 'CafeYTragedia', time: 'hace 8 horas', text: 'Si no le dices nada te voy a atropellar yo.' },
-]
+import { useQuery } from '@tanstack/react-query'
+import { getFragments } from '@/services/fragments'
+import { getRecentComments } from '@/services/comments'
+import { formatRelativeTime } from '@/lib/utils'
 
 export default function Sidebar() {
+  const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
+  const preview = useMemo(() =>
+    // eslint-disable-next-line react-hooks/purity
+    [...fragments].sort(() => Math.random() - 0.5).slice(0, 3)
+  , [fragments])
+  const { data: comments = [] } = useQuery({ queryKey: ['comments_recent'], queryFn: () => getRecentComments(3) })
+
   return (
     <aside className="flex flex-col gap-8">
       {/* Sobre la historia */}
@@ -44,11 +44,15 @@ export default function Sidebar() {
           </Link>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {fragments.map((f) => (
-            <div key={f.id} className="group cursor-pointer">
-              <div className="aspect-square bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
-              <p className="mt-1 text-[10px] text-[#8a7a60] text-center leading-tight">{f.label}</p>
-            </div>
+          {preview.map((f) => (
+            <Link key={f.id} to="/fragmentos" className="group">
+              {f.image_url ? (
+                <img src={f.image_url} alt={f.title} className="aspect-square w-full object-cover rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
+              ) : (
+                <div className="aspect-square bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/40 transition-all" />
+              )}
+              <p className="mt-1 text-[10px] text-[#8a7a60] text-center leading-tight">{f.title}</p>
+            </Link>
           ))}
         </div>
       </div>
@@ -91,21 +95,21 @@ export default function Sidebar() {
         </div>
         <div className="space-y-3">
           {comments.map((c) => (
-            <div key={c.user} className="flex items-start gap-2">
+            <div key={c.id} className="flex items-start gap-2">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#3a2e1e] to-[#2a1f10] flex-shrink-0 border border-[#3a2e1e]" />
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[11px] font-medium text-[#c9a96e]">{c.user}</span>
-                  <span className="text-[10px] text-[#6a5a40]">{c.time}</span>
+                  <span className="text-[11px] font-medium text-[#c9a96e]">{c.user.username}</span>
+                  <span className="text-[10px] text-[#6a5a40]">{formatRelativeTime(c.created_at)}</span>
                 </div>
-                <p className="text-[12px] text-[#8a7a60] mt-0.5">{c.text}</p>
+                <p className="text-[12px] text-[#8a7a60] mt-0.5">{c.content}</p>
               </div>
             </div>
           ))}
         </div>
-        <button className="w-full mt-4 py-2 border border-[#3a2e1e] text-[10px] tracking-widest text-[#8a7a60] hover:border-[#c9a96e] hover:text-[#c9a96e] uppercase transition-all">
+        <Link to="/capitulos" className="block w-full mt-4 py-2 border border-[#3a2e1e] text-[10px] tracking-widest text-[#8a7a60] hover:border-[#c9a96e] hover:text-[#c9a96e] uppercase transition-all text-center">
           Dejar mi comentario
-        </button>
+        </Link>
       </div>
     </aside>
   )

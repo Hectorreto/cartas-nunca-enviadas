@@ -1,17 +1,53 @@
--- ================================================================
--- PROFILES
--- Se crea automáticamente cuando un usuario se registra
--- ================================================================
-create table public.profiles (
-  id         uuid primary key references auth.users on delete cascade,
-  username   text unique not null,
-  avatar_url text,
-  created_at timestamptz default now()
-);
 
--- Trigger: crea un perfil al registrarse
-create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+
+COMMENT ON SCHEMA "public" IS 'standard public schema';
+
+
+
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
+
+
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
 begin
   insert into public.profiles (id, username)
   values (
@@ -22,226 +58,664 @@ begin
 end;
 $$;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
 
--- ================================================================
--- CHAPTERS
--- ================================================================
-create table public.chapters (
-  id           uuid primary key default gen_random_uuid(),
-  number       integer unique not null,
-  title        text not null,
-  cover_url    text not null,
-  published_at timestamptz default now(),
-  is_free      boolean default true,
-  created_at   timestamptz default now()
+ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
+
+SET default_tablespace = '';
+
+SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."blog_posts" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "slug" "text" NOT NULL,
+    "title" "text" NOT NULL,
+    "excerpt" "text" NOT NULL,
+    "content" "text"[] DEFAULT '{}'::"text"[] NOT NULL,
+    "cover_url" "text" DEFAULT ''::"text" NOT NULL,
+    "published_at" "date" NOT NULL,
+    "tag" "text" DEFAULT ''::"text" NOT NULL,
+    "featured" boolean DEFAULT false NOT NULL
 );
 
--- ================================================================
--- CHAPTER PANELS
--- Imágenes verticales del webtoon, ordenadas por "order"
--- ================================================================
-create table public.chapter_panels (
-  id         uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references public.chapters on delete cascade,
-  "order"    integer not null,
-  image_url  text not null,
-  width      integer not null default 800,
-  height     integer not null,
-  unique (chapter_id, "order")
+
+ALTER TABLE "public"."blog_posts" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."chapter_panels" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "chapter_id" "uuid" NOT NULL,
+    "order" integer NOT NULL,
+    "image_url" "text" NOT NULL,
+    "width" integer DEFAULT 800 NOT NULL,
+    "height" integer NOT NULL
 );
 
--- ================================================================
--- COMMENTS
--- ================================================================
-create table public.comments (
-  id         uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references public.chapters on delete cascade,
-  user_id    uuid not null references public.profiles on delete cascade,
-  content    text not null,
-  created_at timestamptz default now()
+
+ALTER TABLE "public"."chapter_panels" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."chapters" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "number" integer NOT NULL,
+    "title" "text" NOT NULL,
+    "cover_url" "text" NOT NULL,
+    "published_at" timestamp with time zone DEFAULT "now"(),
+    "is_free" boolean DEFAULT true,
+    "created_at" timestamp with time zone DEFAULT "now"()
 );
 
--- ================================================================
--- ROW LEVEL SECURITY
--- ================================================================
-alter table public.profiles      enable row level security;
-alter table public.chapters      enable row level security;
-alter table public.chapter_panels enable row level security;
-alter table public.comments      enable row level security;
 
--- Profiles: cualquiera puede leer, solo el dueño puede editar
-create policy "profiles: public read"
-  on public.profiles for select using (true);
+ALTER TABLE "public"."chapters" OWNER TO "postgres";
 
-create policy "profiles: own update"
-  on public.profiles for update using (auth.uid() = id);
 
--- Chapters: los capítulos free son públicos, los premium requieren login
-create policy "chapters: free are public"
-  on public.chapters for select using (is_free = true);
-
-create policy "chapters: premium requires auth"
-  on public.chapters for select using (auth.role() = 'authenticated');
-
--- Panels: hereda la lógica del capítulo padre
-create policy "panels: free are public"
-  on public.chapter_panels for select
-  using (
-    exists (
-      select 1 from public.chapters c
-      where c.id = chapter_id and c.is_free = true
-    )
-  );
-
-create policy "panels: premium requires auth"
-  on public.chapter_panels for select
-  using (auth.role() = 'authenticated');
-
--- Comments: public read, solo autenticados pueden escribir o borrar los suyos
-create policy "comments: public read"
-  on public.comments for select using (true);
-
-create policy "comments: auth insert"
-  on public.comments for insert with check (auth.uid() = user_id);
-
-create policy "comments: own delete"
-  on public.comments for delete using (auth.uid() = user_id);
-
--- ================================================================
--- STORAGE BUCKET para imágenes del webtoon
--- ================================================================
-insert into storage.buckets (id, name, public)
-values ('comic', 'comic', true);
-
-create policy "comic bucket: public read"
-  on storage.objects for select
-  using (bucket_id = 'comic');
-
-create policy "comic bucket: admin insert"
-  on storage.objects for insert
-  with check (
-    bucket_id = 'comic'
-    and (select role from public.profiles where id = auth.uid()) = 'admin'
-  );
-
-create policy "comic bucket: admin update"
-  on storage.objects for update
-  using (
-    bucket_id = 'comic'
-    and (select role from public.profiles where id = auth.uid()) = 'admin'
-  );
-
-create policy "comic bucket: admin delete"
-  on storage.objects for delete
-  using (
-    bucket_id = 'comic'
-    and (select role from public.profiles where id = auth.uid()) = 'admin'
-  );
-
--- ================================================================
--- MIGRACIÓN 1: role en profiles
--- ================================================================
-alter table public.profiles
-  add column role text not null default 'reader'
-  check (role in ('reader', 'admin'));
-
--- Impide que un usuario cambie su propio rol
-create policy "profiles: no self role change"
-  on public.profiles for update
-  using (auth.uid() = id)
-  with check (role = (select role from public.profiles where id = auth.uid()));
-
--- ================================================================
--- MIGRACIÓN 2: reading_progress
--- ================================================================
-create table public.reading_progress (
-  user_id     uuid not null references public.profiles on delete cascade,
-  chapter_id  uuid not null references public.chapters on delete cascade,
-  panel_index integer not null default 0,
-  updated_at  timestamptz default now(),
-  primary key (user_id, chapter_id)
+CREATE TABLE IF NOT EXISTS "public"."characters" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "name" "text" NOT NULL,
+    "label" "text" NOT NULL,
+    "tagline" "text" NOT NULL,
+    "description" "text" NOT NULL,
+    "portrait_url" "text" DEFAULT ''::"text" NOT NULL,
+    "role" "text" NOT NULL,
+    "traits" "text"[] DEFAULT '{}'::"text"[] NOT NULL,
+    "first_appearance" "text" DEFAULT ''::"text" NOT NULL,
+    CONSTRAINT "characters_role_check" CHECK (("role" = ANY (ARRAY['main'::"text", 'secondary'::"text"])))
 );
-alter table public.reading_progress enable row level security;
-create policy "progress: own only"
-  on public.reading_progress for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- ================================================================
--- MIGRACIÓN 3: tablas de contenido (blog, personajes, fragmentos, extras)
--- ================================================================
-create table public.blog_posts (
-  id           uuid primary key default gen_random_uuid(),
-  slug         text unique not null,
-  title        text not null,
-  excerpt      text not null,
-  content      text[] not null default '{}',
-  cover_url    text not null default '',
-  published_at date not null,
-  tag          text not null default '',
-  featured     boolean not null default false
+
+ALTER TABLE "public"."characters" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."comments" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "chapter_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "content" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"()
 );
-alter table public.blog_posts enable row level security;
-create policy "blog_posts: public read" on public.blog_posts for select using (true);
-create policy "blog_posts: admin write" on public.blog_posts for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
 
-create table public.characters (
-  id               uuid primary key default gen_random_uuid(),
-  name             text not null,
-  label            text not null,
-  tagline          text not null,
-  description      text not null,
-  portrait_url     text not null default '',
-  role             text not null check (role in ('main', 'secondary')),
-  traits           text[] not null default '{}',
-  first_appearance text not null default ''
+
+ALTER TABLE "public"."comments" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."extras" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "title" "text" NOT NULL,
+    "category" "text" NOT NULL,
+    "image_url" "text" DEFAULT ''::"text" NOT NULL,
+    "download_url" "text",
+    "description" "text" DEFAULT ''::"text" NOT NULL
 );
-alter table public.characters enable row level security;
-create policy "characters: public read" on public.characters for select using (true);
-create policy "characters: admin write" on public.characters for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
 
-create table public.fragments (
-  id             uuid primary key default gen_random_uuid(),
-  title          text not null,
-  description    text not null,
-  image_url      text not null default '',
-  chapter_number integer not null,
-  chapter_title  text not null,
-  aspect         text not null default 'square' check (aspect in ('tall', 'wide', 'square'))
+
+ALTER TABLE "public"."extras" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."fragments" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "title" "text" NOT NULL,
+    "description" "text" NOT NULL,
+    "image_url" "text" DEFAULT ''::"text" NOT NULL,
+    "chapter_number" integer NOT NULL,
+    "chapter_title" "text" NOT NULL,
+    "aspect" "text" DEFAULT 'square'::"text" NOT NULL,
+    CONSTRAINT "fragments_aspect_check" CHECK (("aspect" = ANY (ARRAY['tall'::"text", 'wide'::"text", 'square'::"text"])))
 );
-alter table public.fragments enable row level security;
-create policy "fragments: public read" on public.fragments for select using (true);
-create policy "fragments: admin write" on public.fragments for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
 
-create table public.extras (
-  id           uuid primary key default gen_random_uuid(),
-  title        text not null,
-  category     text not null,
-  image_url    text not null default '',
-  download_url text,
-  description  text not null default ''
+
+ALTER TABLE "public"."fragments" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."profiles" (
+    "id" "uuid" NOT NULL,
+    "username" "text" NOT NULL,
+    "avatar_url" "text",
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "role" "text" DEFAULT 'reader'::"text" NOT NULL,
+    CONSTRAINT "profiles_role_check" CHECK (("role" = ANY (ARRAY['reader'::"text", 'admin'::"text"])))
 );
-alter table public.extras enable row level security;
-create policy "extras: public read" on public.extras for select using (true);
-create policy "extras: admin write" on public.extras for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
 
--- ================================================================
--- MIGRACIÓN 4: admin write en chapters y chapter_panels
--- ================================================================
-create policy "chapters: admin write" on public.chapters for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
 
-create policy "chapter_panels: admin write" on public.chapter_panels for all
-  using ((select role from public.profiles where id = auth.uid()) = 'admin')
-  with check ((select role from public.profiles where id = auth.uid()) = 'admin');
+ALTER TABLE "public"."profiles" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."reading_progress" (
+    "user_id" "uuid" NOT NULL,
+    "chapter_id" "uuid" NOT NULL,
+    "panel_index" integer DEFAULT 0 NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."reading_progress" OWNER TO "postgres";
+
+
+ALTER TABLE ONLY "public"."blog_posts"
+    ADD CONSTRAINT "blog_posts_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."blog_posts"
+    ADD CONSTRAINT "blog_posts_slug_key" UNIQUE ("slug");
+
+
+
+ALTER TABLE ONLY "public"."chapter_panels"
+    ADD CONSTRAINT "chapter_panels_chapter_id_order_key" UNIQUE ("chapter_id", "order");
+
+
+
+ALTER TABLE ONLY "public"."chapter_panels"
+    ADD CONSTRAINT "chapter_panels_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."chapters"
+    ADD CONSTRAINT "chapters_number_key" UNIQUE ("number");
+
+
+
+ALTER TABLE ONLY "public"."chapters"
+    ADD CONSTRAINT "chapters_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."characters"
+    ADD CONSTRAINT "characters_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."comments"
+    ADD CONSTRAINT "comments_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."extras"
+    ADD CONSTRAINT "extras_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."fragments"
+    ADD CONSTRAINT "fragments_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."profiles"
+    ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."profiles"
+    ADD CONSTRAINT "profiles_username_key" UNIQUE ("username");
+
+
+
+ALTER TABLE ONLY "public"."reading_progress"
+    ADD CONSTRAINT "reading_progress_pkey" PRIMARY KEY ("user_id", "chapter_id");
+
+
+
+ALTER TABLE ONLY "public"."chapter_panels"
+    ADD CONSTRAINT "chapter_panels_chapter_id_fkey" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."comments"
+    ADD CONSTRAINT "comments_chapter_id_fkey" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."comments"
+    ADD CONSTRAINT "comments_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."profiles"
+    ADD CONSTRAINT "profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."reading_progress"
+    ADD CONSTRAINT "reading_progress_chapter_id_fkey" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."reading_progress"
+    ADD CONSTRAINT "reading_progress_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE "public"."blog_posts" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "blog_posts: admin write" ON "public"."blog_posts" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "blog_posts: public read" ON "public"."blog_posts" FOR SELECT USING (true);
+
+
+
+ALTER TABLE "public"."chapter_panels" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "chapter_panels: admin write" ON "public"."chapter_panels" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+ALTER TABLE "public"."chapters" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "chapters: admin write" ON "public"."chapters" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "chapters: free are public" ON "public"."chapters" FOR SELECT USING (("is_free" = true));
+
+
+
+CREATE POLICY "chapters: premium requires auth" ON "public"."chapters" FOR SELECT USING (("auth"."role"() = 'authenticated'::"text"));
+
+
+
+ALTER TABLE "public"."characters" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "characters: admin write" ON "public"."characters" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "characters: public read" ON "public"."characters" FOR SELECT USING (true);
+
+
+
+ALTER TABLE "public"."comments" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "comments: auth insert" ON "public"."comments" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
+
+
+
+CREATE POLICY "comments: own delete" ON "public"."comments" FOR DELETE USING (("auth"."uid"() = "user_id"));
+
+
+
+CREATE POLICY "comments: public read" ON "public"."comments" FOR SELECT USING (true);
+
+
+
+ALTER TABLE "public"."extras" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "extras: admin write" ON "public"."extras" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "extras: public read" ON "public"."extras" FOR SELECT USING (true);
+
+
+
+ALTER TABLE "public"."fragments" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "fragments: admin write" ON "public"."fragments" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "fragments: public read" ON "public"."fragments" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "panels: free are public" ON "public"."chapter_panels" FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."chapters" "c"
+  WHERE (("c"."id" = "chapter_panels"."chapter_id") AND ("c"."is_free" = true)))));
+
+
+
+CREATE POLICY "panels: premium requires auth" ON "public"."chapter_panels" FOR SELECT USING (("auth"."role"() = 'authenticated'::"text"));
+
+
+
+ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "profiles: no self role change" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id")) WITH CHECK (("role" = ( SELECT "profiles_1"."role"
+   FROM "public"."profiles" "profiles_1"
+  WHERE ("profiles_1"."id" = "auth"."uid"()))));
+
+
+
+CREATE POLICY "profiles: own update" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id"));
+
+
+
+CREATE POLICY "profiles: public read" ON "public"."profiles" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "progress: own only" ON "public"."reading_progress" USING (("auth"."uid"() = "user_id")) WITH CHECK (("auth"."uid"() = "user_id"));
+
+
+
+ALTER TABLE "public"."reading_progress" ENABLE ROW LEVEL SECURITY;
+
+
+
+
+ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+GRANT USAGE ON SCHEMA "public" TO "postgres";
+GRANT USAGE ON SCHEMA "public" TO "anon";
+GRANT USAGE ON SCHEMA "public" TO "authenticated";
+GRANT USAGE ON SCHEMA "public" TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GRANT ALL ON TABLE "public"."blog_posts" TO "anon";
+GRANT ALL ON TABLE "public"."blog_posts" TO "authenticated";
+GRANT ALL ON TABLE "public"."blog_posts" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."chapter_panels" TO "anon";
+GRANT ALL ON TABLE "public"."chapter_panels" TO "authenticated";
+GRANT ALL ON TABLE "public"."chapter_panels" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."chapters" TO "anon";
+GRANT ALL ON TABLE "public"."chapters" TO "authenticated";
+GRANT ALL ON TABLE "public"."chapters" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."characters" TO "anon";
+GRANT ALL ON TABLE "public"."characters" TO "authenticated";
+GRANT ALL ON TABLE "public"."characters" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."comments" TO "anon";
+GRANT ALL ON TABLE "public"."comments" TO "authenticated";
+GRANT ALL ON TABLE "public"."comments" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."extras" TO "anon";
+GRANT ALL ON TABLE "public"."extras" TO "authenticated";
+GRANT ALL ON TABLE "public"."extras" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."fragments" TO "anon";
+GRANT ALL ON TABLE "public"."fragments" TO "authenticated";
+GRANT ALL ON TABLE "public"."fragments" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."profiles" TO "anon";
+GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
+GRANT ALL ON TABLE "public"."profiles" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."reading_progress" TO "anon";
+GRANT ALL ON TABLE "public"."reading_progress" TO "authenticated";
+GRANT ALL ON TABLE "public"."reading_progress" TO "service_role";
+
+
+
+
+
+
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "service_role";
+
+
+
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "service_role";
+
+
+
+
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

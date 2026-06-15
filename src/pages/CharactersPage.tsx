@@ -60,7 +60,11 @@ function MainCard({ character: c, onClick }: { character: Character; onClick: ()
       onClick={onClick}
     >
       {/* Portrait */}
-      <div className="w-28 flex-shrink-0 aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all" />
+      {c.portrait_url ? (
+        <img src={c.portrait_url} alt={c.name} className="w-28 flex-shrink-0 aspect-[3/4] object-cover rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all" />
+      ) : (
+        <div className="w-28 flex-shrink-0 aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all" />
+      )}
 
       {/* Info */}
       <div className="flex flex-col justify-between min-w-0">
@@ -91,7 +95,11 @@ function SecondaryCard({ character: c, onClick }: { character: Character; onClic
       className="bg-[#1a1510] border border-[#3a2e1e] rounded-sm p-4 cursor-pointer hover:border-[#c9a96e]/50 transition-all group"
       onClick={onClick}
     >
-      <div className="w-full aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all mb-3" />
+      {c.portrait_url ? (
+        <img src={c.portrait_url} alt={c.name} className="w-full aspect-[3/4] object-cover rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all mb-3" />
+      ) : (
+        <div className="w-full aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e] group-hover:border-[#c9a96e]/30 transition-all mb-3" />
+      )}
       <p className="text-[9px] tracking-[0.2em] text-[#c9a96e] uppercase mb-0.5">{c.label}</p>
       <p className="font-serif text-[14px] text-[#f0e0c0] leading-tight mb-1">{c.name}</p>
       <p className="text-[11px] text-[#8a7a60] italic line-clamp-2">{c.tagline}</p>
@@ -116,7 +124,11 @@ function CharacterModal({ character: c, onClose }: { character: Character; onClo
 
         <div className="flex gap-6 p-6">
           {/* Portrait */}
-          <div className="w-36 flex-shrink-0 aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e]" />
+          {c.portrait_url ? (
+            <img src={c.portrait_url} alt={c.name} className="w-36 flex-shrink-0 aspect-[3/4] object-cover rounded-sm border border-[#3a2e1e]" />
+          ) : (
+            <div className="w-36 flex-shrink-0 aspect-[3/4] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm border border-[#3a2e1e]" />
+          )}
 
           {/* Info */}
           <div className="flex-1 min-w-0">

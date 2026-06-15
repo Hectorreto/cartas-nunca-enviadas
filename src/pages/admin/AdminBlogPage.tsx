@@ -1,21 +1,13 @@
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Loader2, Star } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getBlogPosts, deleteBlogPost } from '@/services/blog'
-import { formatChapterDate } from '@/lib/mockData'
-import { toast } from '@/lib/toast'
+import { Plus, Pencil, Loader2, Star } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getBlogPosts } from '@/services/blog'
+import { formatChapterDate } from '@/lib/utils'
 import AdminBlogEditPage from './AdminBlogEditPage'
 
 function BlogList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: posts = [], isLoading } = useQuery({ queryKey: ['blog_posts'], queryFn: getBlogPosts })
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteBlogPost,
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['blog_posts'] }); toast.success('Entrada eliminada') },
-    onError: () => toast.error('Error al eliminar la entrada'),
-  })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>
 
@@ -44,7 +36,7 @@ function BlogList() {
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal">Título</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Tag</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Fecha</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
             <tbody>
@@ -61,13 +53,9 @@ function BlogList() {
                   </td>
                   <td className="px-4 py-3 text-[#6a5a40] hidden sm:table-cell">{formatChapterDate(p.published_at)}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end">
                       <button onClick={() => navigate(p.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
-                      </button>
-                      <button onClick={() => { if (confirm(`¿Eliminar "${p.title}"?`)) deleteMutation.mutate(p.id) }}
-                        disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>

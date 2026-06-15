@@ -25,3 +25,6 @@ dist-ssr
 
 # Planning
 PLAN.md
+
+# Supabase CLI
+supabase/.temp/

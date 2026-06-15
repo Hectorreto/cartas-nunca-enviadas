@@ -1,20 +1,12 @@
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getFragments, deleteFragment } from '@/services/fragments'
-import { toast } from '@/lib/toast'
+import { Plus, Pencil, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getFragments } from '@/services/fragments'
 import AdminFragmentEditPage from './AdminFragmentEditPage'
 
 function FragmentList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { data: fragments = [], isLoading } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteFragment,
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['fragments'] }); toast.success('Fragmento eliminado') },
-    onError: () => toast.error('Error al eliminar el fragmento'),
-  })
 
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={20} className="animate-spin text-[#8a7a60]" /></div>
 
@@ -43,7 +35,7 @@ function FragmentList() {
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal">Título</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Capítulo</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest text-[#6a5a40] uppercase font-normal hidden sm:table-cell">Proporción</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
             <tbody>
@@ -55,13 +47,9 @@ function FragmentList() {
                     <span className="text-[9px] tracking-widest uppercase text-[#6a5a40] border border-[#6a5a40]/30 px-2 py-0.5">{f.aspect}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end">
                       <button onClick={() => navigate(f.id)} className="p-1.5 text-[#8a7a60] hover:text-[#c9a96e] transition-colors" title="Editar">
                         <Pencil size={13} />
-                      </button>
-                      <button onClick={() => { if (confirm(`¿Eliminar "${f.title}"?`)) deleteMutation.mutate(f.id) }}
-                        disabled={deleteMutation.isPending} className="p-1.5 text-[#8a7a60] hover:text-red-400 transition-colors" title="Eliminar">
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>

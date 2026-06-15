@@ -52,12 +52,12 @@ export default function Navbar() {
 
         {/* Search + Auth */}
         <div className="flex items-center gap-3 ml-auto">
-          <div className="hidden md:flex items-center gap-2 bg-[#1a1510] border border-[#3a2e1e] rounded px-3 py-1.5">
-            <Search size={14} className="text-[#8a7a60]" />
+          <div className="hidden md:block relative w-44 bg-[#1a1510] border border-[#3a2e1e] rounded">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a7a60] pointer-events-none" />
             <input
               type="text"
               placeholder="Buscar..."
-              className="bg-transparent text-[13px] text-[#d4c4a0] placeholder-[#8a7a60] outline-none w-32"
+              className="bg-transparent text-[13px] text-[#d4c4a0] placeholder-[#8a7a60] outline-none w-full py-1.5 pl-[34px] pr-3"
             />
           </div>
 

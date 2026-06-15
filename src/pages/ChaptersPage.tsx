@@ -4,7 +4,7 @@ import { Lock } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import Layout from '@/components/layout/Layout'
 import { getChapters } from '@/services/chapters'
-import { formatChapterDate } from '@/lib/mockData'
+import { formatChapterDate } from '@/lib/utils'
 
 type Filter = 'all' | 'free' | 'premium'
 
