@@ -202,6 +202,7 @@ function ChapterForm({
           storagePath={`covers/${id ?? newId}/cover.jpg`}
           label="Portada del capítulo"
           onChange={setCoverUrl}
+          onClear={() => setCoverUrl('')}
         />
 
         {/* Paneles */}

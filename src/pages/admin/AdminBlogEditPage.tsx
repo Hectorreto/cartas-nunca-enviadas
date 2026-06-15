@@ -136,7 +136,7 @@ function BlogForm({ id, post }: { id?: string; post?: BlogPost }) {
 
         {/* Portada */}
         <ImageUpload value={coverUrl} storagePath={`blog/${id ?? newId}/cover.jpg`}
-          label="Imagen de portada" onChange={setCoverUrl} />
+          label="Imagen de portada" onChange={setCoverUrl} onClear={() => setCoverUrl('')} />
 
         {/* Contenido */}
         <div className="border-t border-[#3a2e1e] pt-6">

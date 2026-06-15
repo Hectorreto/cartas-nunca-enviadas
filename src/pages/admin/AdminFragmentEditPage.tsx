@@ -109,7 +109,7 @@ function FragmentForm({ id, fragment }: { id?: string; fragment?: Fragment }) {
 
         {/* Imagen */}
         <ImageUpload value={imageUrl} storagePath={`fragments/${id ?? newId}/image.jpg`}
-          label="Imagen del fragmento" onChange={setImageUrl} />
+          label="Imagen del fragmento" onChange={setImageUrl} onClear={() => setImageUrl('')} />
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !title}

@@ -141,7 +141,7 @@ function CharacterForm({ id, character }: { id?: string; character?: Character }
 
         {/* Retrato */}
         <ImageUpload value={portraitUrl} storagePath={`characters/${id ?? newId}/portrait.jpg`}
-          label="Retrato del personaje" onChange={setPortraitUrl} />
+          label="Retrato del personaje" onChange={setPortraitUrl} onClear={() => setPortraitUrl('')} />
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !name || !label}

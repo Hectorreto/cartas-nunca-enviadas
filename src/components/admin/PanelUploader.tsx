@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { X, GripVertical, Plus } from 'lucide-react'
+import { X, GripVertical, Plus, ArrowDownToLine } from 'lucide-react'
 
 export interface PanelSlot {
   id: string
@@ -31,6 +31,7 @@ export default function PanelUploader({ panels, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const dragIndexRef = useRef<number | null>(null)
   const [dragOver, setDragOver] = useState<number | null>(null)
+  const [dragOverAdd, setDragOverAdd] = useState(false)
 
   async function handleFiles(files: FileList) {
     const newSlots: PanelSlot[] = await Promise.all(
@@ -104,10 +105,23 @@ export default function PanelUploader({ panels, onChange }: Props) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="aspect-[2/3] border border-dashed border-[#3a2e1e] rounded-sm flex flex-col items-center justify-center gap-1 text-[#6a5a40] hover:border-[#c9a96e]/50 hover:text-[#8a7a60] transition-all"
+          onDragOver={(e) => { e.preventDefault(); setDragOverAdd(true) }}
+          onDragLeave={() => setDragOverAdd(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverAdd(false)
+            if (e.dataTransfer.files.length) void handleFiles(e.dataTransfer.files)
+          }}
+          className={`aspect-[2/3] border rounded-sm flex flex-col items-center justify-center gap-1 transition-all ${
+            dragOverAdd
+              ? 'border-[#c9a96e] bg-[#c9a96e]/10 text-[#c9a96e] shadow-[0_0_12px_#c9a96e33]'
+              : 'border-dashed border-[#3a2e1e] text-[#6a5a40] hover:border-[#c9a96e]/50 hover:text-[#8a7a60]'
+          }`}
         >
-          <Plus size={16} />
-          <span className="text-[9px] tracking-widest uppercase">Agregar</span>
+          {dragOverAdd ? <ArrowDownToLine size={16} /> : <Plus size={16} />}
+          <span className="text-[9px] tracking-widest uppercase">
+            {dragOverAdd ? 'Suelta aquí' : 'Agregar'}
+          </span>
         </button>
       </div>
 

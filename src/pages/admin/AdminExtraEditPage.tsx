@@ -109,7 +109,7 @@ function ExtraForm({ id, extra }: { id?: string; extra?: Extra }) {
 
         {/* Imagen */}
         <ImageUpload value={imageUrl} storagePath={`extras/${id ?? newId}/image.jpg`}
-          label="Imagen" onChange={setImageUrl} />
+          label="Imagen" onChange={setImageUrl} onClear={() => setImageUrl('')} />
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saveMutation.isPending || !title}
