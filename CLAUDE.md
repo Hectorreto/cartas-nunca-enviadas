@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev       # Start dev server (localhost:5173)
 npm run build     # Type-check + production build
-npm run lint      # ESLint
+npm run lint      # Type-check + ESLint
 npm run preview   # Preview production build locally
 npm run schema:pull   # Sync supabase/schema.sql with the real remote schema
 npx tsc --noEmit  # Type-check only (run before committing)

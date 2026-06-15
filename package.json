@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "tsc --noEmit && eslint .",
     "preview": "vite preview",
     "schema:pull": "supabase db dump --linked -f supabase/schema.sql"
   },
