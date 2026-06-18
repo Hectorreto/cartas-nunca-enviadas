@@ -166,6 +166,19 @@ CREATE TABLE IF NOT EXISTS "public"."fragments" (
 ALTER TABLE "public"."fragments" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."hero_slides" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "title" "text" NOT NULL,
+    "subtitle" "text",
+    "image_url" "text",
+    "link_url" "text",
+    "order" integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE "public"."hero_slides" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "id" "uuid" NOT NULL,
     "username" "text" NOT NULL,
@@ -249,6 +262,11 @@ ALTER TABLE ONLY "public"."extras"
 
 ALTER TABLE ONLY "public"."fragments"
     ADD CONSTRAINT "fragments_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."hero_slides"
+    ADD CONSTRAINT "hero_slides_pkey" PRIMARY KEY ("id");
 
 
 
@@ -407,6 +425,9 @@ CREATE POLICY "fragments: public read" ON "public"."fragments" FOR SELECT USING 
 
 
 
+ALTER TABLE "public"."hero_slides" ENABLE ROW LEVEL SECURITY;
+
+
 CREATE POLICY "panels: free are public" ON "public"."chapter_panels" FOR SELECT USING ((EXISTS ( SELECT 1
    FROM "public"."chapters" "c"
   WHERE (("c"."id" = "chapter_panels"."chapter_id") AND ("c"."is_free" = true)))));
@@ -452,6 +473,16 @@ CREATE POLICY "settings: public read" ON "public"."site_settings" FOR SELECT USI
 
 
 ALTER TABLE "public"."site_settings" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "slides: admin write" ON "public"."hero_slides" USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "slides: public read" ON "public"."hero_slides" FOR SELECT USING (true);
+
 
 
 
@@ -673,6 +704,12 @@ GRANT ALL ON TABLE "public"."extras" TO "service_role";
 GRANT ALL ON TABLE "public"."fragments" TO "anon";
 GRANT ALL ON TABLE "public"."fragments" TO "authenticated";
 GRANT ALL ON TABLE "public"."fragments" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."hero_slides" TO "anon";
+GRANT ALL ON TABLE "public"."hero_slides" TO "authenticated";
+GRANT ALL ON TABLE "public"."hero_slides" TO "service_role";
 
 
 

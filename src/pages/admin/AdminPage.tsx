@@ -7,6 +7,7 @@ import AdminCharactersPage from './AdminCharactersPage'
 import AdminFragmentsPage from './AdminFragmentsPage'
 import AdminExtrasPage from './AdminExtrasPage'
 import AdminSettingsPage from './AdminSettingsPage'
+import AdminCarouselPage from './AdminCarouselPage'
 
 export default function AdminPage() {
   return (
@@ -18,6 +19,7 @@ export default function AdminPage() {
         <Route path="personajes/*" element={<AdminCharactersPage />} />
         <Route path="fragmentos/*" element={<AdminFragmentsPage />} />
         <Route path="extras/*" element={<AdminExtrasPage />} />
+        <Route path="carrusel/*" element={<AdminCarouselPage />} />
         <Route path="configuracion" element={<AdminSettingsPage />} />
       </Routes>
     </AdminLayout>

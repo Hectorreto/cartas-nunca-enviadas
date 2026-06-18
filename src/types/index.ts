@@ -84,3 +84,12 @@ export interface SiteSettings {
   trailer_url: string | null
   playlist_url: string | null
 }
+
+export interface HeroSlide {
+  id: string
+  title: string
+  subtitle: string | null
+  image_url: string | null
+  link_url: string | null
+  order: number
+}
