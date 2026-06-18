@@ -50,6 +50,9 @@ export default function ChaptersSection() {
           {chapters.map((ch) => (
             <Link key={ch.id} to={`/leer/${ch.id}`} className="flex-shrink-0 w-[145px] group">
               <div className="relative w-full aspect-[2/3] bg-gradient-to-b from-[#2a1f10] to-[#1a1208] rounded-sm overflow-hidden border border-[#3a2e1e] group-hover:border-[#c9a96e]/50 transition-all">
+                {ch.cover_url && (
+                  <img src={ch.cover_url} alt={ch.title} className="absolute inset-0 w-full h-full object-cover" />
+                )}
                 <span className="absolute top-2 left-2 text-[10px] font-mono text-[#c9a96e] bg-[#0d0b08]/80 px-1.5 py-0.5">
                   {String(ch.number).padStart(2, '0')}
                 </span>
