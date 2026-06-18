@@ -53,7 +53,7 @@ function SlideForm({ id, slide, nextOrder }: { id?: string; slide?: HeroSlide; n
   const [linkUrl, setLinkUrl] = useState(slide?.link_url ?? '')
 
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const data = {
         title,
         subtitle: subtitle || null,
@@ -61,7 +61,7 @@ function SlideForm({ id, slide, nextOrder }: { id?: string; slide?: HeroSlide; n
         link_url: linkUrl || null,
         order: slide?.order ?? nextOrder,
       }
-      return isNew ? createHeroSlide(data) : updateHeroSlide(id!, data)
+      await (isNew ? createHeroSlide(data) : updateHeroSlide(id!, data))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['hero_slides'] })
