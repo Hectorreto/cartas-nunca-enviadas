@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Users, Image, Package, MessageSquare } from 'lucide-react'
+import { BookOpen, FileText, Users, Image, Package, MessageSquare, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 
@@ -7,7 +7,8 @@ const sections = [
   { to: '/admin/blog',       label: 'Blog',        icon: FileText,      description: 'Escribe y edita las entradas del blog.' },
   { to: '/admin/personajes', label: 'Personajes',  icon: Users,         description: 'Gestiona los personajes de la historia.' },
   { to: '/admin/fragmentos', label: 'Fragmentos',  icon: Image,         description: 'Añade escenas y momentos destacados.' },
-  { to: '/admin/extras',     label: 'Extras',      icon: Package,       description: 'Arte conceptual, wallpapers y más.' },
+  { to: '/admin/extras',         label: 'Extras',          icon: Package,   description: 'Arte conceptual, wallpapers y más.' },
+  { to: '/admin/configuracion', label: 'Configuración',   icon: Settings,  description: 'Imagen hero, tráiler y playlist de la home.' },
 ]
 
 export default function AdminDashboard() {

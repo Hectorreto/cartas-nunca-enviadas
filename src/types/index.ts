@@ -78,3 +78,9 @@ export interface ReadingProgress {
   panel_index: number
   updated_at: string
 }
+
+export interface SiteSettings {
+  hero_image_url: string | null
+  trailer_url: string | null
+  playlist_url: string | null
+}

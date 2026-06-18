@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { BookOpen, FileText, Users, Image, Package, LayoutDashboard, ExternalLink, LogOut } from 'lucide-react'
+import { BookOpen, FileText, Users, Image, Package, LayoutDashboard, ExternalLink, LogOut, Settings } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const navItems = [
@@ -9,7 +9,8 @@ const navItems = [
   { to: '/admin/blog',       label: 'Blog',        icon: FileText },
   { to: '/admin/personajes', label: 'Personajes',  icon: Users },
   { to: '/admin/fragmentos', label: 'Fragmentos',  icon: Image },
-  { to: '/admin/extras',     label: 'Extras',      icon: Package },
+  { to: '/admin/extras',         label: 'Extras',         icon: Package },
+  { to: '/admin/configuracion', label: 'Configuración',  icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

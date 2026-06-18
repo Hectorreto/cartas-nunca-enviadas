@@ -6,6 +6,7 @@ import AdminBlogPage from './AdminBlogPage'
 import AdminCharactersPage from './AdminCharactersPage'
 import AdminFragmentsPage from './AdminFragmentsPage'
 import AdminExtrasPage from './AdminExtrasPage'
+import AdminSettingsPage from './AdminSettingsPage'
 
 export default function AdminPage() {
   return (
@@ -17,6 +18,7 @@ export default function AdminPage() {
         <Route path="personajes/*" element={<AdminCharactersPage />} />
         <Route path="fragmentos/*" element={<AdminFragmentsPage />} />
         <Route path="extras/*" element={<AdminExtrasPage />} />
+        <Route path="configuracion" element={<AdminSettingsPage />} />
       </Routes>
     </AdminLayout>
   )

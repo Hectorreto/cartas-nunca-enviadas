@@ -190,6 +190,18 @@ CREATE TABLE IF NOT EXISTS "public"."reading_progress" (
 ALTER TABLE "public"."reading_progress" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."site_settings" (
+    "id" boolean DEFAULT true NOT NULL,
+    "hero_image_url" "text",
+    "trailer_url" "text",
+    "playlist_url" "text",
+    CONSTRAINT "site_settings_id_check" CHECK ("id")
+);
+
+
+ALTER TABLE "public"."site_settings" OWNER TO "postgres";
+
+
 ALTER TABLE ONLY "public"."blog_posts"
     ADD CONSTRAINT "blog_posts_pkey" PRIMARY KEY ("id");
 
@@ -252,6 +264,11 @@ ALTER TABLE ONLY "public"."profiles"
 
 ALTER TABLE ONLY "public"."reading_progress"
     ADD CONSTRAINT "reading_progress_pkey" PRIMARY KEY ("user_id", "chapter_id");
+
+
+
+ALTER TABLE ONLY "public"."site_settings"
+    ADD CONSTRAINT "site_settings_pkey" PRIMARY KEY ("id");
 
 
 
@@ -422,6 +439,19 @@ CREATE POLICY "progress: own only" ON "public"."reading_progress" USING (("auth"
 
 
 ALTER TABLE "public"."reading_progress" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "settings: admin write" ON "public"."site_settings" FOR UPDATE USING ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+
+
+
+CREATE POLICY "settings: public read" ON "public"."site_settings" FOR SELECT USING (true);
+
+
+
+ALTER TABLE "public"."site_settings" ENABLE ROW LEVEL SECURITY;
 
 
 
@@ -655,6 +685,12 @@ GRANT ALL ON TABLE "public"."profiles" TO "service_role";
 GRANT ALL ON TABLE "public"."reading_progress" TO "anon";
 GRANT ALL ON TABLE "public"."reading_progress" TO "authenticated";
 GRANT ALL ON TABLE "public"."reading_progress" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."site_settings" TO "anon";
+GRANT ALL ON TABLE "public"."site_settings" TO "authenticated";
+GRANT ALL ON TABLE "public"."site_settings" TO "service_role";
 
 
 

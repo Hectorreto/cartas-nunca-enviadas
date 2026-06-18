@@ -4,10 +4,12 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getFragments } from '@/services/fragments'
 import { getRecentComments } from '@/services/comments'
+import { getSettings } from '@/services/siteSettings'
 import { formatRelativeTime } from '@/lib/utils'
 
 export default function Sidebar() {
   const { data: fragments = [] } = useQuery({ queryKey: ['fragments'], queryFn: getFragments })
+  const { data: settings } = useQuery({ queryKey: ['site_settings'], queryFn: getSettings })
   const preview = useMemo(() =>
     // eslint-disable-next-line react-hooks/purity
     [...fragments].sort(() => Math.random() - 0.5).slice(0, 3)
@@ -61,9 +63,16 @@ export default function Sidebar() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[10px] tracking-[0.25em] text-[#d4c4a0] uppercase">Playlist Oficial</h3>
-          <a href="#" className="text-[10px] text-[#8a7a60] hover:text-[#c9a96e] transition-colors uppercase tracking-wider">
-            Escuchar →
-          </a>
+          {settings?.playlist_url && (
+            <a
+              href={settings.playlist_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-[#8a7a60] hover:text-[#c9a96e] transition-colors uppercase tracking-wider"
+            >
+              Escuchar →
+            </a>
+          )}
         </div>
         <div className="flex items-center gap-3 bg-[#1a1510] border border-[#3a2e1e] rounded-sm p-3">
           <div className="w-12 h-12 bg-gradient-to-br from-[#2a1f10] to-[#0d0b08] rounded-sm flex-shrink-0 flex items-center justify-center border border-[#3a2e1e]">

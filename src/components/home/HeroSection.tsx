@@ -1,13 +1,21 @@
 import { Play } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getSettings } from '@/services/siteSettings'
 
 const slides = [1, 2, 3, 4, 5]
 
 export default function HeroSection() {
+  const { data: settings } = useQuery({ queryKey: ['site_settings'], queryFn: getSettings })
+  const heroImage = settings?.hero_image_url
+  const trailerUrl = settings?.trailer_url
+
   return (
     <div className="relative w-full aspect-[16/9] max-h-[520px] overflow-hidden rounded-sm">
-      {/* Imagen de fondo — placeholder hasta tener imagen real */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#2a1f10] via-[#1a1208] to-[#0d0b08]" />
+      {heroImage && (
+        <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      )}
 
       {/* Overlay inferior */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08] via-[#0d0b08]/40 to-transparent" />
@@ -31,12 +39,19 @@ export default function HeroSection() {
           >
             Comenzar a leer
           </Link>
-          <button className="flex items-center gap-2 text-[#d4c4a0] text-[13px] hover:text-[#c9a96e] transition-colors">
-            <span className="w-8 h-8 rounded-full border border-[#8a7a60] flex items-center justify-center">
-              <Play size={12} fill="currentColor" />
-            </span>
-            Ver Tráiler
-          </button>
+          {trailerUrl && (
+            <a
+              href={trailerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-[#d4c4a0] text-[13px] hover:text-[#c9a96e] transition-colors"
+            >
+              <span className="w-8 h-8 rounded-full border border-[#8a7a60] flex items-center justify-center">
+                <Play size={12} fill="currentColor" />
+              </span>
+              Ver Tráiler
+            </a>
+          )}
         </div>
       </div>
 
