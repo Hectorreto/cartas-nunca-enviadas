@@ -19,23 +19,32 @@ export default function Sidebar() {
   return (
     <aside className="flex flex-col gap-8">
       {/* Sobre la historia */}
-      <div>
-        <h3 className="text-[10px] tracking-[0.25em] text-[#d4c4a0] uppercase mb-3">
-          Sobre la historia
-        </h3>
-        <div className="text-[13px] text-[#8a7a60] leading-relaxed space-y-0.5">
-          <p>Él no creía en el amor.</p>
-          <p>Ella no creía en rendirse.</p>
-          <p>Dos almas tercas. Dos heridas profundas.</p>
-          <p>Un encuentro que cambiará todo...</p>
-          <p className="text-[#6a5a40]">Aunque el destino ya tenga otros planes.</p>
+      {(settings?.story_paragraphs || settings?.story_closing || settings?.story_quote) && (
+        <div>
+          <h3 className="text-[10px] tracking-[0.25em] text-[#d4c4a0] uppercase mb-3">
+            Sobre la historia
+          </h3>
+          {(settings.story_paragraphs || settings.story_closing) && (
+            <div className="text-[13px] text-[#8a7a60] leading-relaxed space-y-0.5">
+              {settings.story_paragraphs &&
+                settings.story_paragraphs.split('\n').filter(Boolean).map((line, i) => (
+                  <p key={i}>{line}</p>
+                ))
+              }
+              {settings.story_closing && (
+                <p className="text-[#6a5a40]">{settings.story_closing}</p>
+              )}
+            </div>
+          )}
+          {settings.story_quote && (
+            <blockquote className="mt-4 pl-3 border-l-2 border-[#c9a96e]/40 font-serif italic text-[13px] text-[#8a7a60] leading-relaxed">
+              <span className="text-[#c9a96e] text-2xl leading-none font-serif">"</span>
+              {settings.story_quote}
+              <span className="text-[#c9a96e] text-2xl leading-none font-serif">"</span>
+            </blockquote>
+          )}
         </div>
-        <blockquote className="mt-4 pl-3 border-l-2 border-[#c9a96e]/40 font-serif italic text-[13px] text-[#8a7a60] leading-relaxed">
-          <span className="text-[#c9a96e] text-2xl leading-none font-serif">"</span>
-          No fue la muerte lo que nos separó, fue el orgullo, el miedo y todas las cosas que no supimos decir a tiempo.
-          <span className="text-[#c9a96e] text-2xl leading-none font-serif">"</span>
-        </blockquote>
-      </div>
+      )}
 
       {/* Fragmentos */}
       <div>

@@ -83,6 +83,9 @@ export interface SiteSettings {
   hero_image_url: string | null
   trailer_url: string | null
   playlist_url: string | null
+  story_paragraphs: string | null
+  story_closing: string | null
+  story_quote: string | null
 }
 
 export interface HeroSlide {

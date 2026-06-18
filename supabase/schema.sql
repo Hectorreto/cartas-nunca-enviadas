@@ -208,6 +208,9 @@ CREATE TABLE IF NOT EXISTS "public"."site_settings" (
     "hero_image_url" "text",
     "trailer_url" "text",
     "playlist_url" "text",
+    "story_paragraphs" "text",
+    "story_closing" "text",
+    "story_quote" "text",
     CONSTRAINT "site_settings_id_check" CHECK ("id")
 );
 

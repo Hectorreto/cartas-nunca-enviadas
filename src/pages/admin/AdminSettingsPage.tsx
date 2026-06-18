@@ -20,15 +20,21 @@ function SettingsForm({ initial }: { initial: SiteSettings }) {
   const [heroUrl, setHeroUrl] = useState(initial.hero_image_url ?? '')
   const [trailerUrl, setTrailerUrl] = useState(initial.trailer_url ?? '')
   const [playlistUrl, setPlaylistUrl] = useState(initial.playlist_url ?? '')
+  const [storyParagraphs, setStoryParagraphs] = useState(initial.story_paragraphs ?? '')
+  const [storyClosing, setStoryClosing] = useState(initial.story_closing ?? '')
+  const [storyQuote, setStoryQuote] = useState(initial.story_quote ?? '')
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => updateSettings({
       hero_image_url: heroUrl || null,
       trailer_url: trailerUrl || null,
       playlist_url: playlistUrl || null,
+      story_paragraphs: storyParagraphs || null,
+      story_closing: storyClosing || null,
+      story_quote: storyQuote || null,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['site_settings'] })
+      void queryClient.invalidateQueries({ queryKey: ['site_settings'] })
       toast.success('Configuración guardada')
     },
     onError: () => toast.error('Error al guardar la configuración'),
@@ -82,6 +88,47 @@ function SettingsForm({ initial }: { initial: SiteSettings }) {
             placeholder="https://open.spotify.com/..."
             className={inputClass}
           />
+        </div>
+
+        {/* Sobre la historia */}
+        <div className="border-t border-[#3a2e1e] pt-6">
+          <h2 className="text-[10px] tracking-[0.2em] text-[#8a7a60] uppercase mb-4">Sobre la historia</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-[11px] tracking-widest text-[#8a7a60] uppercase mb-2 block">Párrafos principales</label>
+              <textarea
+                value={storyParagraphs}
+                onChange={(e) => setStoryParagraphs(e.target.value)}
+                rows={5}
+                placeholder={"Él no creía en el amor.\nElla no creía en rendirse.\nDos almas tercas. Dos heridas profundas."}
+                className={`${inputClass} resize-none`}
+              />
+              <p className="text-[11px] text-[#6a5a40] mt-1.5">Cada línea se muestra como un párrafo separado.</p>
+            </div>
+
+            <div>
+              <label className="text-[11px] tracking-widest text-[#8a7a60] uppercase mb-2 block">Párrafo final (oscurecido)</label>
+              <input
+                type="text"
+                value={storyClosing}
+                onChange={(e) => setStoryClosing(e.target.value)}
+                placeholder="Aunque el destino ya tenga otros planes."
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] tracking-widest text-[#8a7a60] uppercase mb-2 block">Frase entre comillas</label>
+              <input
+                type="text"
+                value={storyQuote}
+                onChange={(e) => setStoryQuote(e.target.value)}
+                placeholder="No fue la muerte lo que nos separó..."
+                className={inputClass}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="border-t border-[#3a2e1e] pt-6">
